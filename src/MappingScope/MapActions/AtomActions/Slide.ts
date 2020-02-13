@@ -1,55 +1,51 @@
-import { EditMap, Slide, SlideOrderFields } from "../../EditMap"
-import { insertIntoSortedSet } from "../../../Common/sortedSet"
-import { neverHappen, assert } from "../../../Common/utils"
+import { EditMap, Slide } from "../../EditMap"
+import { assert, neverHappen, shallowPatch } from "../../../Common/utils"
 import { makeAction } from "./types"
 
 
 const add = (map: EditMap, id: number, flickend: boolean) => {
   const slide: Slide = {
-    id, notes: [], flickend
+    id, flickend, notes: []
   }
-
-  const res = insertIntoSortedSet(map.slides, slide, SlideOrderFields)[0]
-  if (!res) neverHappen()
+  map.slides.set(id, slide)
 
   return slide
 }
 
 const del = (map: EditMap, id: number) => {
-  const index = map.slides.findIndex(x => x.id === id)
-  if (index < 0) neverHappen()
-  const s = map.slides[index]
+  const s = assert(map.slides.get(id))
   if (s.notes.length > 0) neverHappen()
-  map.slides.splice(index, 1)
-  map.slidesmap.delete(s.id)
+
+  map.slides.delete(id)
 
   return s
 }
 
-const setField = (map: EditMap, id: number, flickend: boolean) => {
-  const s = assert(map.slidesmap.get(id))
+type PatchType = Partial<Pick<Slide, "flickend">>
 
-  if (s.flickend === flickend) return
-  const prev = s.flickend
-  s.flickend = flickend
+const set = (map: EditMap, id: number, patch: PatchType) => {
+  const s = assert(map.slides.get(id))
+  const changes = shallowPatch(s, patch)
+  if (changes) {
 
-  return { prev }
+    return changes
+  }
 }
 
-export const AddSlide = makeAction((map: EditMap, id: number, flickend: boolean) => {
-  const res = add(map, id, flickend)
-  if (res)
-    return (map: EditMap) => del(map, res.id)
-})
-
-export const RemoveSlide = makeAction((map: EditMap, id: number) => {
-  const res = del(map, id)
-  if (res)
-    return (map: EditMap) => add(map, res.id, res.flickend)
-})
-
-export const SetSlide = makeAction((map: EditMap, id: number, flickend: boolean) => {
-  const res = setField(map, id, flickend)
-  if (res)
-    return (map: EditMap) => setField(map, id, res.prev)
-})
+export const SlideActions = {
+  Add: makeAction((map: EditMap, id: number, flickend: boolean) => {
+    const res = add(map, id, flickend)
+    if (res)
+      return (map: EditMap) => del(map, res.id)
+  }),
+  Remove: makeAction((map: EditMap, id: number) => {
+    const res = del(map, id)
+    if (res)
+      return (map: EditMap) => add(map, res.id, res.flickend)
+  }),
+  Set: makeAction((map: EditMap, id: number, patch: PatchType) => {
+    const res = set(map, id, patch)
+    if (res)
+      return (map: EditMap) => set(map, id, patch)
+  })
+}

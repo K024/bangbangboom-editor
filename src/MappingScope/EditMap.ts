@@ -1,5 +1,4 @@
-import { neverHappen, gard, assert } from "../Common/utils"
-import { Fields } from "../Common/binarySearch"
+import { neverHappen, assert, entryList } from "../Common/utils"
 
 export type WithId = {
   id: number
@@ -37,15 +36,19 @@ export type FlickNote = {
 } & TimedPosition
 
 export type Slide = {
-  notes: SlideNote[]
+  /**
+   * note id from first to last ordered
+   */
+  notes: number[]
   flickend: boolean
 } & WithId
 
 export type SlideNote = {
   type: "slide"
-  slideid: number
-  isfirst: boolean
-  islast: boolean
+  /**
+   * slide id
+   */
+  slide: number
 } & TimedPosition
 
 export type NoteType = SingleNote | FlickNote | SlideNote
@@ -72,60 +75,102 @@ export type Timepoint = {
   bpb: number
 } & WithId
 
+type EditMapForJson = {
+  timepoints: Array<[number, Timepoint]>
+  slides: Array<[number, Slide]>
+  notes: Array<[number, NoteType]>
+}
+
+export function TimepointSignature(tp: Timepoint) {
+  return `tp:${tp.time}`
+}
+export function NoteSignature(note: NoteType) {
+  return `note:${note.timepoint}:${note.offset}:${note.lane}`
+}
+
 export class EditMap {
-  timepoints: Timepoint[]
-  timepointsmap: Map<number, Timepoint>
+  /**
+   * id => timepoint
+   */
+  timepoints: Map<number, Timepoint>
+  /**
+   * signature => timepoint
+   */
+  timepointsignature: Map<string, Timepoint>
 
-  slides: Slide[]
-  slidesmap: Map<number, Slide>
+  /**
+   * id => slide
+   */
+  slides: Map<number, Slide>
 
-  notes: NoteType[]
-  notesmap: Map<number, NoteType>
+  /**
+   * id => note
+   */
+  notes: Map<number, NoteType>
+  /**
+   * signature => note
+   */
+  notesignature: Map<string, NoteType>
 
   private constructor() { neverHappen() }
 
   static create(): EditMap {
     return {
-      timepoints: [],
-      timepointsmap: new Map(),
-      slides: [],
-      slidesmap: new Map(),
-      notes: [],
-      notesmap: new Map(),
+      timepoints: new Map(),
+      timepointsignature: new Map(),
+      slides: new Map(),
+      notes: new Map(),
+      notesignature: new Map(),
     }
   }
 
   static toJsonString(map: DeepReadonly<EditMap>) {
-    const { timepoints, slides, notes } = map
-    return JSON.stringify({
-      timepoints, slides, notes
-    })
+    const { timepoints, slides, notes } = map as EditMap
+    const forJson: EditMapForJson = {
+      timepoints: entryList(timepoints),
+      slides: entryList(slides),
+      notes: entryList(notes)
+    }
+    forJson.timepoints.forEach(x => delete x[1].ticktimecache)
+    forJson.notes.forEach(x => delete x[1].realtimecache)
+    return JSON.stringify(forJson)
   }
 
   static fromJson(json: string): EditMap {
-    const raw = JSON.parse(json) as EditMap
-    raw.timepointsmap = new Map(raw.timepoints.map(x => [x.id, x]))
-    raw.notesmap = new Map(raw.notes.map(x => [x.id, x]))
-    raw.slidesmap = new Map(raw.slides.map(x => [x.id, x]))
-    return raw
+    const { timepoints, slides, notes } = JSON.parse(json) as EditMapForJson
+    const map: EditMap = {
+      timepoints: new Map(timepoints),
+      timepointsignature: new Map(timepoints.map(x => [TimepointSignature(x[1]), x[1]])),
+      slides: new Map(slides),
+      notes: new Map(notes),
+      notesignature: new Map(notes.map(x => [NoteSignature(x[1]), x[1]]))
+    }
+    if (map.timepoints.size !== map.timepointsignature.size) neverHappen()
+    if (map.notes.size !== map.notesignature.size) neverHappen()
+    if (slides.some(x => x[1].notes.some(n => !map.notes.has(n)))) neverHappen()
+    if (notes.some(x => x[1].type === "slide" && !map.slides.has(x[1].slide))) neverHappen()
+    timepoints.forEach(x => FreshTimepointCache(x[1]))
+    notes.forEach(x => FreshNoteCache(map, x[1]))
+    return map
   }
 }
 
-export const TimepointOrderFields: Fields<Timepoint> = [tp => tp.time]
-export const NotesOrderFields: Fields<NoteType> = [n => n.realtimecache, n => n.lane]
-export const SlideOrderFields: Fields<Slide> = [s => gard(s.notes[0]?.realtimecache, -1), s => s.notes.length, s => s.id]
-export const SlideNoteOrderFields: Fields<SlideNote> = [s => s.realtimecache]
-
-export const FreshTimepointCache = (...timepoints: Timepoint[]) => {
-  for (const tp of timepoints) {
-    tp.ticktimecache = 60 / tp.bpm / 96
-  }
+export function FreshTimepointCache(tp: Timepoint) {
+  tp.ticktimecache = 60 / tp.bpm / 96
 }
 
-export const FresNoteCache = (map: EditMap, ...notes: TimedPosition[]) => {
-  let tp: Timepoint = null as any
-  for (const n of notes) {
-    if (!tp || tp.id !== n.timepoint) tp = assert(map.timepointsmap.get(n.timepoint))
-    n.realtimecache = tp.time + tp.ticktimecache * n.offset
-  }
+export function FreshNoteCache(map: EditMap, n: TimedPosition) {
+  const tp = assert(map.timepoints.get(n.timepoint))
+  n.realtimecache = tp.time + tp.ticktimecache * n.offset
+}
+
+export function ResortSlide(map: EditMap, slide: Slide) {
+  let hasEqual = false
+  const sorted = slide.notes.sort((a, b) => {
+    const res = assert(map.notes.get(a)).realtimecache - assert(map.notes.get(b)).realtimecache
+    if (res === 0) hasEqual = true
+    return res
+  })
+  if (!hasEqual) slide.notes = sorted
+  return hasEqual
 }

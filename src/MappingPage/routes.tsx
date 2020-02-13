@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect } from "react"
+import { createSharedState } from "../Common/hooks"
 
 const routes = {
   "#meta": () => <></>,
@@ -8,9 +9,11 @@ const routes = {
 }
 export type RoutePath = keyof typeof routes
 
-export const useHashRoutes = () => {
+const useRoutes = createSharedState(window.location.hash as RoutePath)
 
-  const [path, navigateTo] = useState(() => window.location.hash as RoutePath)
+export const useHashRoutes = (): [string, React.ComponentType<{}>, React.Dispatch<React.SetStateAction<keyof typeof routes>>] => {
+
+  const [path, navigateTo] = useRoutes()
 
   const ContentComponent = routes[path]
 
@@ -18,7 +21,8 @@ export const useHashRoutes = () => {
     if (!ContentComponent) {
       navigateTo("#meta")
     }
-  }, [ContentComponent])
+  }, [ContentComponent, navigateTo])
 
-  return [path, ContentComponent, navigateTo]
+  return [path, ContentComponent || (() => null), navigateTo]
 }
+

@@ -1,5 +1,11 @@
 
-export type ImmutableArgs = (number | string | boolean | null | undefined)[]
+export type Immutable = (number | string | boolean | null | undefined | bigint | symbol)
+
+type Extra = {
+  [key: string]: Immutable
+}
+
+export type ImmutableArgs = (Immutable | Extra)[]
 
 export type AtomAction<TState, TArgs extends ImmutableArgs> =
   (state: TState, ...args: TArgs) => undefined | ((state: TState) => void)
