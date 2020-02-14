@@ -8,7 +8,7 @@ export type NumberFieldProps = TextFieldProps & {
   onNumberChange?: (e: React.ChangeEvent, v: number) => void
 }
 
-export const NumberField = forwardRef<HTMLDivElement, NumberFieldProps>((props, ref) => {
+export default forwardRef<HTMLDivElement, NumberFieldProps>((props, ref) => {
 
   const {
     number,

@@ -46,36 +46,43 @@ function isObject(item: any): item is object {
 
 function _patch(obj: any, p: any): any {
   const prev: any = {}
+  let changed = false
   for (const k in p) {
     if (p[k] !== undefined) {
       if (obj[k] !== p[k]) {
         prev[k] = obj[k]
         obj[k] = p[k]
+        changed = true
       }
     } else {
       delete obj[k]
     }
   }
-  for (const k in prev) return prev
+  if (changed) return prev
 }
 
 function _deepPatch(obj: any, p: any): any {
   if (!isObject(obj) && !isObject(p)) return
   const prev: any = {}
+  let changed = false
   for (const k in p) {
     if (p[k] !== undefined) {
       if (isObject(p[k]) && isObject(obj[k])) {
         const changes = _deepPatch(obj[k], p[k])
-        if (changes) prev[k] = changes
+        if (changes) {
+          prev[k] = changes
+          changed = true
+        }
       } else if (obj[k] !== p[k]) {
         prev[k] = obj[k]
         obj[k] = p[k]
+        changed = true
       }
     } else {
       delete obj[k]
     }
   }
-  for (const k in prev) return prev
+  if (changed) return prev
 }
 
 /**
@@ -87,9 +94,7 @@ function _deepPatch(obj: any, p: any): any {
  * @param p   - the patch object
  * @returns previous value of changed items if any change applied, else undefined
  */
-export function shallowPatch<T extends {}, R extends Partial<T>>(obj: T, p: R): Partial<R> | undefined {
-  return _patch(obj, p)
-}
+export const shallowPatch = _patch as <T extends {}, R extends Partial<T>>(obj: T, p: R) => Partial<R> | undefined
 
 /**
  * patch the object by another object 
@@ -100,18 +105,29 @@ export function shallowPatch<T extends {}, R extends Partial<T>>(obj: T, p: R): 
  * @param p   - the patch object
  * @returns previous value of changed items if any change applied, else undefined
  */
-export function deepPatch<T extends {}, R extends Partial<T>>(obj: T, p: R): Partial<R> | undefined {
-  return _deepPatch(obj, p)
-}
+export const deepPatch = _deepPatch as <T extends {}, R extends Partial<T>>(obj: T, p: R) => Partial<R> | undefined
 
 /**
  * convert a map to entry list
  * @param map - the map to convert
  */
-export function entryList<K, V>(map: Map<K, V>) {
+export function entryList<K, V>(map: Map<K, V> | DeepReadonly<Map<K, V>>) {
   const list: [K, V][] = []
   for (const e of map.entries()) {
     list.push(e)
   }
   return list
+}
+
+export function TimeToString(s: number) {
+  if (s < 0) return "00:00:000"
+  let minutes = Math.floor(s / 60)
+  s -= minutes * 60
+  minutes += 100
+  let seconds = Math.floor(s)
+  s -= seconds
+  seconds += 100
+  let milis = Math.floor(s * 1000)
+  milis += 1000
+  return minutes.toString().substr(1) + ":" + seconds.toString().substr(1) + ":" + milis.toString().substr(1)
 }

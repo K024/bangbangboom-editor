@@ -1,7 +1,7 @@
 import React from "react"
 import Box from "@material-ui/core/Box"
 import makeStyles from "@material-ui/core/styles/makeStyles"
-import { useBackgroundStyle } from "../states"
+import { Background } from "../states"
 
 const useStyles = makeStyles(theme => ({
   background: {
@@ -13,14 +13,16 @@ const useStyles = makeStyles(theme => ({
 export default () => {
 
   const cn = useStyles()
-  const [bgStyle] = useBackgroundStyle()
+  const src = Background.src.useShared()
+  const dim = Background.dim.useShared()
+  const cover = Background.cover.useShared()
 
   return (
     <Box className={cn.background}
       style={{
-        backgroundImage: bgStyle.imageSrc ? `url(${bgStyle.imageSrc})` : "",
-        opacity: 1 - bgStyle.dim,
-        backgroundSize: bgStyle.cover ? "cover" : "contain"
+        backgroundImage: src ? `url(${src})` : "",
+        opacity: 1 - dim,
+        backgroundSize: cover ? "cover" : "contain"
       }}
     />
   )
