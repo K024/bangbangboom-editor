@@ -60,7 +60,7 @@ All timepoints are stored in a list and accessed by **index**
 `<note pos> => <timepoint index>:<offset>:<lane>`  
 
 `<timepoint index>` is index of timepoint (should appear before note)  
-`<offset>` is the count of **1/96 quarter beat** time to the timepoint  
+`<offset>` is the count of **1/48 quarter beat** time to the timepoint  
 `<lane>` is from left to right: 0 => 6
 
 ## **single note**

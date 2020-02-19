@@ -11,7 +11,7 @@ export type TimedPosition = {
   timepoint: number
 
   /**
-   * the count of 1/96 beats from that timepoint
+   * the count of 1/48 beats from that timepoint
    */
   offset: number
 
@@ -65,7 +65,7 @@ export type Timepoint = {
   bpm: number
 
   /**
-   * the cached time of 1/96 beat
+   * the cached time of 1/48 beat
    */
   ticktimecache: number
 
@@ -76,27 +76,17 @@ export type Timepoint = {
 } & WithId
 
 type EditMapForJson = {
-  timepoints: Array<[number, Timepoint]>
-  slides: Array<[number, Slide]>
-  notes: Array<[number, NoteType]>
+  timepoints: Timepoint[]
+  slides: Slide[]
+  notes: NoteType[]
 }
 
-export function TimepointSignature(tp: Timepoint) {
-  return `tp:${tp.time}`
-}
-export function NoteSignature(note: NoteType) {
-  return `note:${note.timepoint}:${note.offset}:${note.lane}`
-}
 
 export class EditMap {
   /**
    * id => timepoint
    */
   timepoints: Map<number, Timepoint>
-  /**
-   * signature => timepoint
-   */
-  timepointsignature: Map<string, Timepoint>
 
   /**
    * id => slide
@@ -107,56 +97,51 @@ export class EditMap {
    * id => note
    */
   notes: Map<number, NoteType>
-  /**
-   * signature => note
-   */
-  notesignature: Map<string, NoteType>
 
-  private constructor() { neverHappen() }
+  private constructor(map: EditMap) {
+    this.timepoints = map.timepoints
+    this.slides = map.slides
+    this.notes = map.notes
+  }
 
   static create(): EditMap {
-    return {
+    return new EditMap({
       timepoints: new Map(),
-      timepointsignature: new Map(),
       slides: new Map(),
       notes: new Map(),
-      notesignature: new Map(),
-    }
+    })
   }
 
   static toJsonString(map: DeepReadonly<EditMap>) {
     const { timepoints, slides, notes } = map as EditMap
     const forJson: EditMapForJson = {
-      timepoints: entryList(timepoints),
-      slides: entryList(slides),
-      notes: entryList(notes)
+      timepoints: entryList(timepoints).map(x => ({ ...x[1] })),
+      slides: entryList(slides).map(x => ({ ...x[1] })),
+      notes: entryList(notes).map(x => ({ ...x[1] }))
     }
-    forJson.timepoints.forEach(x => delete x[1].ticktimecache)
-    forJson.notes.forEach(x => delete x[1].realtimecache)
+    forJson.timepoints.forEach(x => delete x.ticktimecache)
+    forJson.notes.forEach(x => delete x.realtimecache)
     return JSON.stringify(forJson)
   }
 
   static fromJson(json: string): EditMap {
     const { timepoints, slides, notes } = JSON.parse(json) as EditMapForJson
     const map: EditMap = {
-      timepoints: new Map(timepoints),
-      timepointsignature: new Map(timepoints.map(x => [TimepointSignature(x[1]), x[1]])),
-      slides: new Map(slides),
-      notes: new Map(notes),
-      notesignature: new Map(notes.map(x => [NoteSignature(x[1]), x[1]]))
+      timepoints: new Map(timepoints.map(x => [x.id, x])),
+      slides: new Map(slides.map(x => [x.id, x])),
+      notes: new Map(notes.map(x => [x.id, x])),
     }
-    if (map.timepoints.size !== map.timepointsignature.size) neverHappen()
-    if (map.notes.size !== map.notesignature.size) neverHappen()
-    if (slides.some(x => x[1].notes.some(n => !map.notes.has(n)))) neverHappen()
-    if (notes.some(x => x[1].type === "slide" && !map.slides.has(x[1].slide))) neverHappen()
-    timepoints.forEach(x => FreshTimepointCache(x[1]))
-    notes.forEach(x => FreshNoteCache(map, x[1]))
-    return map
+    if (slides.some(x => x.notes.some(n => !map.notes.has(n)))) neverHappen()
+    if (notes.some(x => x.type === "slide" && !map.slides.has(x.slide))) neverHappen()
+    if (notes.some(x => !map.timepoints.has(x.timepoint))) neverHappen()
+    timepoints.forEach(x => FreshTimepointCache(x))
+    notes.forEach(x => FreshNoteCache(map, x))
+    return new EditMap(map)
   }
 }
 
 export function FreshTimepointCache(tp: Timepoint) {
-  tp.ticktimecache = 60 / tp.bpm / 96
+  tp.ticktimecache = 60 / tp.bpm / 48
 }
 
 export function FreshNoteCache(map: EditMap, n: TimedPosition) {
@@ -171,6 +156,6 @@ export function ResortSlide(map: EditMap, slide: Slide) {
     if (res === 0) hasEqual = true
     return res
   })
-  if (!hasEqual) slide.notes = sorted
+  slide.notes = sorted
   return hasEqual
 }

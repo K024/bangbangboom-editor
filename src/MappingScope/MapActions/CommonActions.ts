@@ -21,6 +21,13 @@ export class CommonActions<T> {
     }
   }
 
+  ResetState = (state: T) => {
+    this.history = new AtomHistory(state)
+    this.act_done = []
+    this.act_todo = []
+    this.changed()
+  }
+
   protected done(step: number) {
     if (step > 0) {
       this.act_done.push(step)
@@ -30,7 +37,7 @@ export class CommonActions<T> {
     return false
   }
 
-  Undo() {
+  Undo = () => {
     const step = this.act_done.pop()
     if (step === undefined) return
     this.act_todo.push(step)
@@ -41,7 +48,7 @@ export class CommonActions<T> {
     this.changed()
   }
 
-  Redo() {
+  Redo = () => {
     const step = this.act_todo.pop()
     if (step === undefined) return
     this.act_done.push(step)

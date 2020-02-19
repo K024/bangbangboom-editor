@@ -1,86 +1,140 @@
-import { CommonActions } from "./CommonActions"
-import { EditMap, NoteType, SingleNote, FlickNote, Slide } from "../EditMap"
+import { NoteType, SingleNote, FlickNote } from "../EditMap"
 import { SingleFlickActions } from "./AtomActions/SingleFlick"
 import { randomId, assert, neverHappen } from "../../Common/utils"
 import { SlideActions } from "./AtomActions/Slide"
 import { SlideNoteActions } from "./AtomActions/SlideNote"
+import { TimepointActions } from "./AtomActions/Timepoint"
+import { MapActionsBase } from "./MapAtionsBase"
 
 
-export class MapActions extends CommonActions<EditMap> {
+export class MapActions extends MapActionsBase {
 
-  get map() { return this.state as DeepReadonly<EditMap> }
+  addTimepoint(time: number, bpm: number, bpb: number, justifydivision: number) {
+    return this.done(this.history.doParallel(() => {
+      if (this.history.callAtom(TimepointActions.Add, randomId(), time, bpm, bpb)) {
+        this.justifyFindNearest(this.notelist, justifydivision)
+      }
+    }))
+  }
+
+  moveTimepoint(timepoint: number, justifyFindNearest: boolean, justifydivision: number, time?: number, bpm?: number, bpb?: number) {
+    const tp = assert(this.state.timepoints.get(timepoint))
+    const timechanged =
+      (time !== undefined && tp.time !== time) ||
+      (bpm !== undefined && tp.bpm !== bpm)
+    return this.done(this.history.doParallel(() => {
+      if (this.history.callAtom(TimepointActions.Set, timepoint, { time, bpm, bpb })) {
+        if (timechanged)
+          if (justifyFindNearest) {
+            this.justifyFindNearest(this.notelist, justifydivision)
+          } else {
+            this.justifyFollowChanged(this.notelist, justifydivision)
+          }
+      }
+    }))
+  }
+
+  removeTimepoint(timepoint: number, justifydivision: number) {
+    if (this.state.timepoints.size > 1) {
+      return this.done(this.history.doParallel(() => {
+        if (this.history.callAtom(TimepointActions.Remove, timepoint)) {
+          this.justifyFindNearest(this.notelist, justifydivision)
+        }
+      }))
+    } else {
+      return this.done(this.history.doParallel(() => {
+        this.deleteMany(this.notelist)
+        this.history.callAtom(TimepointActions.Remove, timepoint)
+        if (this.state.slides.size ||
+          this.state.notes.size ||
+          this.state.timepoints.size) neverHappen()
+      }))
+    }
+  }
 
   addSingle(timepoint: number, offset: number, lane: number) {
-    const h = this.history
-    const step = h.doTransaction(() =>
-      h.callAtom(SingleFlickActions.Add, randomId(), "single", timepoint, offset, lane)
-    )
-    return this.done(step)
+    return this.done(this.history.doTransaction(() =>
+      this.history.callAtom(SingleFlickActions.Add, randomId(), "single", timepoint, offset, lane)))
   }
 
-  toggleFlick(note: DeepReadonly<SingleNote | FlickNote>) {
-    const h = this.history
-    const step = h.doTransaction(() =>
-      h.callAtom(SingleFlickActions.Set, note.id, { type: note.type === "single" ? "flick" : "single" })
-    )
-    return this.done(step)
+  toggleFlick(note: SingleNote | FlickNote) {
+    return this.done(this.history.doTransaction(() =>
+      this.history.callAtom(SingleFlickActions.Set, note.id, {
+        type: note.type === "single" ? "flick" : "single"
+      })))
   }
 
-  addSlide(tp1: number, off1: number, lan1: number, tp2: number, off2: number, lan2: number) {
-    const h = this.history
+  addSlide(tp1: number, off1: number, lane1: number, tp2: number, off2: number, lane2: number) {
     const sid = randomId()
-    const step = h.doTransaction(() =>
-      h.callAtom(SlideActions.Add, sid, false) &&
-      h.callAtom(SlideNoteActions.Add, randomId(), sid, tp1, off1, lan1) &&
-      h.callAtom(SlideNoteActions.Add, randomId(), sid, tp2, off2, lan2))
-    return this.done(step)
+    return this.done(this.history.doTransaction(() =>
+      this.history.callAtom(SlideActions.Add, sid, false) &&
+      this.history.callAtom(SlideNoteActions.Add, randomId(), sid, tp1, off1, lane1) &&
+      this.history.callAtom(SlideNoteActions.Add, randomId(), sid, tp2, off2, lane2)))
   }
 
-  addSlideMid(sid: number, timepoint: number, offset: number, lane: number) {
-    const h = this.history
-    const step = h.doTransaction(() =>
-      h.callAtom(SlideNoteActions.Add, randomId(), sid, timepoint, offset, lane))
-    return this.done(step)
+  toggleFlickend(slide: number) {
+    const s = assert(this.state.slides.get(slide))
+    return this.done(this.history.doTransaction(() =>
+      this.history.callAtom(SlideActions.Set, slide, { flickend: !s.flickend })))
   }
 
-  toggleFlickEnd(slide: DeepReadonly<Slide>) {
-    const h = this.history
-    const step = h.doTransaction(() =>
-      h.callAtom(SlideActions.Set, slide.id, { flickend: !slide.flickend })
-    )
-    return this.done(step)
+  timeMove(notes: NoteType[], timeoffset: number, min: number, max: number) {
+    return this.done(this.history.doTransaction(() => {
+      for (const n of notes) {
+        const target = n.realtimecache + timeoffset
+        if (target > max || target < min) return false
+        n.realtimecache = target
+      }
+      this.justifyFindNearest(notes, 48)
+      return true
+    }))
   }
 
-  removeOne(note: DeepReadonly<NoteType>) {
-    const h = this.history
-    const step = h.doTransaction(() => {
-      if (note.type === "slide") {
-        const slide = assert(this.state.slides.get(note.slide))
-        if (slide.notes.length < 2) neverHappen()
-        if (slide.notes.length === 2) {
-          return (
-            h.callAtom(SlideNoteActions.Remove, slide.notes[0]) &&
-            h.callAtom(SlideNoteActions.Remove, slide.notes[0]) &&
-            h.callAtom(SlideActions.Remove, slide.id))
-        } else {
-          return h.callAtom(SlideNoteActions.Remove, note.id)
+  laneMove(notes: NoteType[], laneoffset: number) {
+    return this.done(this.history.doTransaction(() => {
+      for (const n of notes) {
+        const target = n.lane + laneoffset
+        if (target < 0 || target > 6) return false
+        this.patchNote(n, { lane: target })
+      }
+      return true
+    }))
+  }
+
+  copyMany(notes: NoteType[], timeoffset: number, min: number, max: number) {
+    return this.done(this.history.doTransaction(() => {
+      const slideidmap: { [key: number]: number } = {}
+      const getSlide = (prevslideid: number) => {
+        if (slideidmap[prevslideid] === undefined) {
+          const id = randomId()
+          this.history.callAtom(SlideActions.Add, id,
+            assert(this.state.slides.get(prevslideid)).flickend)
+          slideidmap[prevslideid] = id
         }
-      } else {
-        return h.callAtom(SingleFlickActions.Remove, note.id)
+        return slideidmap[prevslideid]
       }
-    })
-    return this.done(step)
+
+      for (const n of notes) {
+        const target = n.realtimecache + timeoffset
+        if (target > max || target < min) return false
+        const res = assert(this.calcNearestPosition(target, 48))
+        if (n.type === "slide") {
+          const slide = getSlide(n.slide)
+          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint, res.offset, n.lane)
+          if (!done) return false
+        } else {
+          const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint, res.offset, n.lane)
+          if (!done) return false
+        }
+      }
+      return true
+    }))
   }
 
-  moveOne(note: DeepReadonly<NoteType>, timepoint: number, offset: number, lane: number) {
-    const h = this.history
-    const step = h.doTransaction(() => {
-      if (note.type === "slide") {
-        return h.callAtom(SlideNoteActions.Set, note.id, { timepoint, offset, lane })
-      } else {
-        return h.callAtom(SingleFlickActions.Set, note.id, { timepoint, offset, lane })
-      }
-    })
-    return this.done(step)
+  removeNotes(notes: NoteType[]) {
+    return this.done(this.history.doParallel(() => {
+      this.deleteMany(notes)
+    }))
   }
+
 }

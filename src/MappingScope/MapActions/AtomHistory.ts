@@ -58,4 +58,11 @@ export class AtomHistory<TState> {
     while (this.act_done.length > startLen) this.undoAtom()
     return 0
   }
+
+  doParallel(fn: () => any) {
+    const startLen = this.act_done.length
+    fn()
+    const done = this.act_done.length - startLen
+    return done
+  }
 }

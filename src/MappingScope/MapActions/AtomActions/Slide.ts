@@ -46,6 +46,6 @@ export const SlideActions = {
   Set: makeAction((map: EditMap, id: number, patch: PatchType) => {
     const res = set(map, id, patch)
     if (res)
-      return (map: EditMap) => set(map, id, patch)
+      return (map: EditMap) => set(map, id, res)
   })
 }

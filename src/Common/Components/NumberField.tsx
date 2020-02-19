@@ -4,7 +4,7 @@ import TextField, { TextFieldProps } from "@material-ui/core/TextField"
 export type NumberFieldProps = TextFieldProps & {
   number: number,
   validator?: (s: string) => number | boolean,
-  numberDisplay?: (v: any) => string,
+  numberDisplay?: (v: number) => string,
   onNumberChange?: (e: React.ChangeEvent, v: number) => void
 }
 

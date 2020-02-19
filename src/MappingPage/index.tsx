@@ -8,6 +8,7 @@ import { theme } from "./theme"
 import MainContent from "./Components/MainContent"
 import HeaderBar from "./Components/HeaderBar"
 import FooterBar from "./Components/FooterBar"
+import GlobalSnackbar from "../Common/Components/GlobalSnackbar"
 
 const useStyles = makeStyles(theme => ({
   content: { position: "fixed", display: "flex", flexDirection: "column", top: 0, bottom: 0, left: 0, right: 0 },
@@ -33,6 +34,7 @@ const MappingPage = () => {
           </Box>
         </Box>
       </Fade>
+      <GlobalSnackbar />
     </ThemeProvider>)
 }
 

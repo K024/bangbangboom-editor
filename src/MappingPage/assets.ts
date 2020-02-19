@@ -15,5 +15,5 @@ for (const k in assets) {
   assets[(k as keyof typeof assets)] = process.env.PUBLIC_URL + assets[(k as keyof typeof assets)]
 }
 
-export default { assets }
+export default assets
 

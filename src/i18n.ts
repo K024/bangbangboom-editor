@@ -9,7 +9,9 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === "development",
+    debug: false,//process.env.NODE_ENV === "development",
+
+    nsSeparator: "::",
 
     interpolation: {
       escapeValue: false
@@ -17,6 +19,10 @@ i18n
 
     backend: {
       loadPath: process.env.PUBLIC_URL + '/locales/{{lng}}.json',
+    },
+
+    react: {
+      useSuspense: false
     }
   })
 

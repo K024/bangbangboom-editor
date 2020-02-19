@@ -1,52 +1,23 @@
-import { useState, useEffect } from "react"
 
-export function createShared<T>(init: T | (() => T)) {
+import hotkey, { KeyHandler } from "hotkeys-js"
 
-  let lastV = init instanceof Function ? init() : init
-
-  const setters = new Set<React.Dispatch<React.SetStateAction<T>>>()
-
-  function getValue() {
-    return lastV
+export function createAnimLoop(fn: (cancel: () => void) => void) {
+  let unmounted = false
+  const cancel = () => {
+    unmounted = true
   }
-
-  function setValue(value: React.SetStateAction<T>) {
-    for (const setter of setters) {
-      setter(value)
-    }
-    lastV = value instanceof Function ? value(lastV) : value
+  const loop = () => {
+    if (unmounted) return
+    requestAnimationFrame(loop)
+    fn(cancel)
   }
-
-  function useShared() {
-
-    const [v, setV] = useState(init)
-
-    useEffect(() => {
-      setters.add(setV)
-      return () => {
-        setters.delete(setV)
-      }
-    }, [])
-
-    return v
-  }
-
-  return {
-    getValue, setValue, useShared
-  }
+  requestAnimationFrame(loop)
+  return cancel
 }
 
-export function createAnimLoop(fn: () => void) {
-  return () => {
-    let unmounted = false
-    const loop = () => {
-      if (unmounted) return
-      requestAnimationFrame(loop)
-      fn()
-    }
-    requestAnimationFrame(loop)
-    return () => {
-      unmounted = true
-    }
+export function addHotkey(key: string, handler: KeyHandler) {
+  hotkey(key, handler)
+  return function () {
+    hotkey.unbind(key, handler)
   }
 }

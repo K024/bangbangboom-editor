@@ -121,13 +121,41 @@ export function entryList<K, V>(map: Map<K, V> | DeepReadonly<Map<K, V>>) {
 
 export function TimeToString(s: number) {
   if (s < 0) return "00:00:000"
-  let minutes = Math.floor(s / 60)
+  let minutes = (s / 60) | 0
   s -= minutes * 60
   minutes += 100
-  let seconds = Math.floor(s)
+  let seconds = (s) | 0
   s -= seconds
   seconds += 100
-  let milis = Math.floor(s * 1000)
+  let milis = (s * 1000 + 0.499) | 0
   milis += 1000
   return minutes.toString().substr(1) + ":" + seconds.toString().substr(1) + ":" + milis.toString().substr(1)
+}
+
+export function once<T>(fn: () => T) {
+  let res: T
+  let called = false
+  return function () {
+    if (!called) {
+      called = true
+      res = fn()
+    }
+    return res
+  }
+}
+
+export function range(from: number, to?: number, step?: number) {
+  if (step === undefined) {
+    step = 1
+  }
+  if (to === undefined) {
+    to = from
+    from = 0
+  }
+  const res: number[] = []
+  while ((to - from) * step > 0) {
+    res.push(from)
+    from += step
+  }
+  return res
 }
