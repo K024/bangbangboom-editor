@@ -44,11 +44,9 @@ const TimepointTable = () => {
             <TableCell>{TimeToString(tp.time)}</TableCell>
             <TableCell>{tp.bpm}</TableCell>
             <TableCell>{tp.bpb}/4</TableCell>
-          </TableRow>
-        ))}
+          </TableRow>))}
       </TableBody>
-    </Table>
-  )
+    </Table>)
 }
 
 const RemoveBtn = () => {

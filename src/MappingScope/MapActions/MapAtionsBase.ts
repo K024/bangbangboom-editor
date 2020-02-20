@@ -48,13 +48,13 @@ export class MapActionsBase extends CommonActions<EditMap> {
     return this._notes
   }
 
-  findTimepoint(time: number) {
+  findTimepoint(time: number): [Timepoint | undefined, number] {
     const tps = this.timepointlist
-    if (tps.length <= 0) return
+    if (tps.length <= 0) return [undefined, -1]
     let tpindex = 0
     while (tpindex < tps.length && time >= tps[tpindex].time) tpindex++
     if (tpindex > 0) tpindex--
-    return tps[tpindex]
+    return [tps[tpindex], tpindex]
   }
 
   /**
@@ -65,16 +65,16 @@ export class MapActionsBase extends CommonActions<EditMap> {
    */
   calcNearestPosition(time: number, division: number) {
     const tickcount = 48 / division
-    const tp = this.findTimepoint(time)
+    const [tp, tpindex] = this.findTimepoint(time)
     if (!tp) return
     const offset = Math.round((time - tp.time) / (tp.ticktimecache * tickcount)) * tickcount
     const realtime = tp.time + tp.ticktimecache * offset
-    const rtp = this.findTimepoint(realtime + tp.ticktimecache) // when its very near to next tp, switch to next
+    const [rtp, rtpindex] = this.findTimepoint(realtime + tp.ticktimecache) // when its very near to next tp, switch to next
     if (rtp && rtp.id !== tp.id) return {
-      timepoint: rtp.id, offset: 0
+      timepoint: rtp.id, offset: 0, timepointIndex: rtpindex
     }
     return {
-      timepoint: tp.id, offset
+      timepoint: tp.id, offset, timepointIndex: tpindex
     }
   }
 

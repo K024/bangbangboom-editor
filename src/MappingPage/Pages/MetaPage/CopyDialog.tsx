@@ -49,6 +49,5 @@ export default () => {
           {t("Close")}
         </Button>
       </DialogActions>
-    </Dialog >
-  )
+    </Dialog >)
 }

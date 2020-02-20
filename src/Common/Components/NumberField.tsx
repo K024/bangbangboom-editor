@@ -55,6 +55,5 @@ export default forwardRef<HTMLDivElement, NumberFieldProps>((props, ref) => {
     <TextField {...others} ref={ref}
       value={display} onChange={onChange} onBlur={onBlur}
       color={valid ? "primary" : "secondary"}>
-    </TextField>
-  )
+    </TextField>)
 })

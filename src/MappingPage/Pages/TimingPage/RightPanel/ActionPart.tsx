@@ -53,7 +53,7 @@ export default () => {
         <FormControlLabel style={{ marginLeft: "auto" }}
           control={<Switch checked={TimingState.muteticker}
             onChange={(e, v) => TimingState.muteticker = v} />}
-          label={t("Mute ticker")} labelPlacement="start" />
+          label={t("Mute metronome")} labelPlacement="start" />
       </Grid>
       <Grid item container>
         <FormControlLabel style={{ marginLeft: "auto" }}

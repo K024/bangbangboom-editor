@@ -124,6 +124,5 @@ export default () => {
         <Divider style={{ margin: "32px -24px", width: "30%" }} />
         <Editor />
       </Grid>
-    </Box>
-  )
+    </Box>)
 }

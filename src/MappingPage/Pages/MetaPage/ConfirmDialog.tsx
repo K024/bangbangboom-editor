@@ -42,6 +42,5 @@ export default () => {
           {t("Reset")}
         </Button>
       </DialogActions>
-    </Dialog >
-  )
+    </Dialog >)
 }

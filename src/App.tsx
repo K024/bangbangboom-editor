@@ -9,9 +9,7 @@ const App = () => {
     document.getElementById("loader-style")?.remove()
   }, [])
 
-  return (
-    <MappingPage />
-  )
+  return <MappingPage />
 }
 
 export default App

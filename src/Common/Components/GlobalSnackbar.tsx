@@ -77,6 +77,5 @@ export default () => {
           </IconButton>,
         ]}
       />
-    </Snackbar>
-  ))
+    </Snackbar>))
 }

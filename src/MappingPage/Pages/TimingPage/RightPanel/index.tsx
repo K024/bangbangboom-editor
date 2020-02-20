@@ -18,6 +18,5 @@ export default () => {
       </Grid>
       <EditPart />
       <ActionPart />
-    </Grid>
-  )
+    </Grid>)
 }

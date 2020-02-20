@@ -18,8 +18,7 @@ export default () => {
       <Box className={cn.content}>
         <Component />
       </Box>
-    </Fade>
-  )
+    </Fade>)
 }
 
 

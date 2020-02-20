@@ -1,5 +1,6 @@
 {
     "editor.tabSize": 2,
+    "editor.emptySelectionClipboard": false,
     // "typescript.validate.enable": false,
     // "javascript.validate.enable": false,
     "typescript.tsserver.maxTsServerMemory": 1024

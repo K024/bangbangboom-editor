@@ -4,7 +4,7 @@ import { observable, autorun } from "mobx"
 import { AudioInstance, AudioSource, AudioElInstance } from "../Common/AudioCtx"
 
 export function useMapChange() {
-  const [i, setI] = useState(0)
+  const [i, setI] = useState(1)
 
   useEffect(() => {
     const listener = () => setI(i => i + 1)
@@ -37,7 +37,7 @@ class MusicState {
   @observable duration = 5
   @observable playing = false
   @observable playbackrate = 1
-  @observable seekcounter = 0
+  @observable private seekcounter = 1
 
   musicfile: null | File = null
 
@@ -49,7 +49,7 @@ class MusicState {
     m.audio = null
     m.duration = 5
     m.playing = false
-    m.seekcounter = 0
+    m.seekcounter = 1
     m.musicfile = null
 
     if (scope.settings.editor.keep_pitch) {
@@ -97,7 +97,8 @@ class MusicState {
   }
 
   position = () => {
-    if (this.audio) return this.audio.position
+    // auto collect dependency for seekcounter
+    if (this.audio && this.seekcounter) return this.audio.position
     return 1
   }
 
@@ -126,13 +127,6 @@ class MusicState {
       this.audio.play()
       this.playing = true
     }
-  }
-
-  scrollSeek = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.stopPropagation()
-    const dt = e.deltaY / 100
-    const target = this.position() - dt
-    this.seek(target)
   }
 
   stop = () => {

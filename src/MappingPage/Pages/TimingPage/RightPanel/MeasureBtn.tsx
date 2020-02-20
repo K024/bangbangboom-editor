@@ -65,12 +65,12 @@ export default () => {
       TimingState.bpm = res.bpm
       TimingState.time = res.offset
     }
-    TimingState.muteformeasure = true
+    TimingState.measuring = true
 
     clearTimeout(s.current.timeoutId)
     s.current.timeoutId = setTimeout(() => {
       s.current.taps.length = 0
-      TimingState.muteformeasure = false
+      TimingState.measuring = false
       setLen(0)
     }, 3000)
   }, [])

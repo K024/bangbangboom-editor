@@ -11,7 +11,7 @@ export const TimingState = observable({
   selected: null as null | number,
 
   muteticker: false,
-  muteformeasure: false,
+  measuring: false,
 
   autoswitchtp: true, // in Timing pad, anim loop
 })

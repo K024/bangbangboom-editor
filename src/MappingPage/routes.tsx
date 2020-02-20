@@ -4,11 +4,12 @@ import { useObserver } from "mobx-react-lite"
 import MetaPage from "./Pages/MetaPage"
 import TimingPage from "./Pages/TimingPage"
 import SettingsPage from "./Pages/SettingsPage"
+import MappingPage from "./Pages/MappingPage"
 
 const routes = {
   "#meta": MetaPage,
   "#timing": TimingPage,
-  "#mapping": () => <>Mapping page</>,
+  "#mapping": MappingPage,
   "#settings": SettingsPage,
 }
 export type RoutePath = keyof typeof routes

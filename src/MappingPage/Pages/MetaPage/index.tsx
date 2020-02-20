@@ -26,7 +26,6 @@ export default () => {
       </Grid>
       <CopyDialog />
       <ConfirmDialog />
-    </Box>
-  )
+    </Box>)
 
 }

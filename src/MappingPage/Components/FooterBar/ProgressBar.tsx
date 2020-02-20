@@ -6,7 +6,7 @@ import { createAnimLoop } from "../../../Common/hooks"
 import { TimeToString } from "../../../Common/utils"
 import { scope } from "../../../MappingScope/scope"
 import { startAnimation, stopAnimation } from "../../../Common/animation"
-import { useObserver, useLocalStore } from "mobx-react-lite"
+import { useObserver } from "mobx-react-lite"
 import { autorun } from "mobx"
 
 const useStyles = makeStyles(theme => ({
@@ -41,10 +41,9 @@ const ProgressLine = () => {
 
   const cn = useStyles()
   const div = useRef<HTMLDivElement>(null)
-  const s = useLocalStore(() => ({ calibration: 1 }))
 
   useEffect(() => autorun(() => {
-    if (div.current && Music.seekcounter >= 0 && s.calibration) {
+    if (div.current) {
       const current = Music.position() / Music.duration
       if (Music.playing) {
         startAnimation(div.current, "left", current * 100, 100, "%", Music.remaintime())
@@ -52,14 +51,7 @@ const ProgressLine = () => {
         stopAnimation(div.current, "left", current * 100, "%")
       }
     }
-  }), [s])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      s.calibration++
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [s])
+  }), [])
 
   return <div className={cn.progress} ref={div}></div>
 }
@@ -81,25 +73,32 @@ const PlayTime = () => {
   return <div className={clsx(cn.flex, cn.center, cn.time)} ref={div} />
 }
 
+const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+  if (!(e.buttons & 1)) return // if not left down
+  const bar = e.currentTarget
+  const x = e.pageX - bar.offsetLeft
+  Music.seek(x / bar.clientWidth * Music.duration)
+}
+
+const handleTouch = (e: React.TouchEvent<HTMLDivElement>) => {
+  const bar = e.currentTarget
+  const x = e.changedTouches[0].pageX - bar.offsetLeft
+  Music.seek(x / bar.clientWidth * Music.duration)
+}
+
+const handleScroll = (e: React.WheelEvent) => {
+  e.stopPropagation()
+  const dt = e.deltaY / 100
+  const target = Music.position() - dt
+  Music.seek(target)
+}
+
 export default () => {
 
   const cn = useStyles()
 
-  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!(e.buttons & 1)) return // if not left down
-    const bar = e.currentTarget
-    const x = e.pageX - bar.offsetLeft
-    Music.seek(x / bar.clientWidth * Music.duration)
-  }
-
-  const handleTouch = (e: React.TouchEvent<HTMLDivElement>) => {
-    const bar = e.currentTarget
-    const x = e.changedTouches[0].pageX - bar.offsetLeft
-    Music.seek(x / bar.clientWidth * Music.duration)
-  }
-
   return useObserver(() =>
-    <div className={clsx(cn.flex, cn.bar)} style={{ overflow: "hidden" }} onWheel={Music.scrollSeek}>
+    <div className={clsx(cn.flex, cn.bar)} style={{ overflow: "hidden" }} onWheel={handleScroll}>
       <PlayTime />
       <div className={cn.bar}
         onMouseDown={handleMouse} onMouseMove={handleMouse}

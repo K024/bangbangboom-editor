@@ -23,7 +23,6 @@ export default () => {
         backgroundImage: Background.src ? `url(${Background.src})` : "",
         opacity: 1 - scope.settings.general.background_dim
       }}
-    />
-  )
+    />)
 }
 

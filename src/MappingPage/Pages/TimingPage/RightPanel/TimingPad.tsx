@@ -33,7 +33,7 @@ const sounds = once(() => ({
 
 let nosounduntil = 0
 function setsound(tick: boolean, timeoutms: number) {
-  if (TimingState.muteformeasure || TimingState.muteticker) return
+  if (TimingState.measuring || TimingState.muteticker) return
   const soundtime = performance.now() + timeoutms
   if (soundtime <= nosounduntil) return
   const s = sounds()
@@ -49,9 +49,9 @@ function animloop(pads: HTMLDivElement[]) {
   /**
    * only if not measuring and selected a timepoint and playing and no changes on editor
    */
-  if (!TimingState.muteformeasure && TimingState.autoswitchtp && TimingState.selected !== null && Music.playing) {
+  if (!TimingState.measuring && TimingState.autoswitchtp && TimingState.selected !== null && Music.playing) {
     if (!changed()) {
-      const tp = scope.map.findTimepoint(pos)
+      const [tp] = scope.map.findTimepoint(pos)
       if (!tp) return
       if (tp.id !== TimingState.selected) {
         TimingState.selected = tp.id

@@ -17,6 +17,5 @@ export default () => {
     <Grid className={cn.timing} container spacing={3}>
       <LeftPanel />
       <RightPanel />
-    </Grid>
-  )
+    </Grid>)
 }

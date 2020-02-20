@@ -129,7 +129,7 @@ export function TimeToString(s: number) {
   seconds += 100
   let milis = (s * 1000 + 0.499) | 0
   milis += 1000
-  return minutes.toString().substr(1) + ":" + seconds.toString().substr(1) + ":" + milis.toString().substr(1)
+  return minutes.toString().substr(1) + ":" + seconds.toString().substr(1) + "." + milis.toString().substr(1)
 }
 
 export function once<T>(fn: () => T) {
