@@ -30,6 +30,7 @@ export class CommonActions<T> {
 
   protected done(step: number) {
     if (step > 0) {
+      this.act_todo.length = 0
       this.act_done.push(step)
       this.changed()
       return true

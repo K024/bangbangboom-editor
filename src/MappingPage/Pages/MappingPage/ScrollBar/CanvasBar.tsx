@@ -5,8 +5,9 @@ import { Music, useMapChange } from "../../../states"
 import { startAnimation, stopAnimation } from "../../../../Common/animation"
 import { state } from "./state"
 import { MappingState } from "../sharedState"
-import { drawScrollBar } from "./drawCanvas"
+import { drawScrollBar, drawWarning } from "./drawCanvas"
 import ProgressLine from "./ProgressLine"
+import { scope } from "../../../../MappingScope/scope"
 
 
 const useStyles = makeStyles(theme => ({
@@ -24,6 +25,8 @@ const Canvas = () => {
     if (canvas.current && change) {
       canvas.current.height = state.barHeight
       drawScrollBar(canvas.current)
+      if (scope.settings.editor.warn_for_same_pos_notes)
+        drawWarning(canvas.current)
     }
   }), [change])
 
@@ -55,7 +58,8 @@ export default () => {
     if (bar.current) {
       bar.current.style.height = state.barHeight + "px"
       if (Music.playing && MappingState.tracking) {
-        startAnimation(bar.current, "transform", Music.position(), Music.duration, state.barTransY, Music.remaintime())
+        startAnimation(bar.current, "transform", MappingState.getViewposition(),
+          MappingState.viewduration, state.barTransY, Music.remaintime())
       } else {
         stopAnimation(bar.current, "transform", MappingState.getViewposition(), state.barTransY)
       }

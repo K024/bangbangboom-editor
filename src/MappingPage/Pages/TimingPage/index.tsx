@@ -6,7 +6,7 @@ import RightPanel from "./RightPanel"
 
 
 const useStyles = makeStyles(theme => ({
-  timing: { width: "100%", maxWidth: 1000, margin: "0 auto" },
+  timing: { width: "100%", maxWidth: 1000, margin: "32px auto" },
 }))
 
 export default () => {

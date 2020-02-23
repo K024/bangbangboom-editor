@@ -8,6 +8,7 @@ import { assert } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Switch from "@material-ui/core/Switch"
+import { useMapChange } from "../../../states"
 
 const addtp = () => {
   scope.map.addTimepoint(
@@ -38,6 +39,7 @@ export const changed = () => {
 export default () => {
 
   const { t } = useTranslation()
+  useMapChange()
 
   return useObserver(() =>
     <Grid item container wrap="wrap" spacing={2}>

@@ -6,6 +6,7 @@ class State {
   @observable containerHeight = 0
   @computed get barHeight() { return MappingState.paddedDuration * barTimeHeightFactor }
   @computed get viewportheight() { return this.containerHeight / MappingState.timeHeightFactor * barTimeHeightFactor }
+  
   progressTransY = (playtime: number) => `translateY(${- barTimeHeightFactor * playtime}px)`
   barTransY = (viewtime: number) => {
     const height = this.barHeight

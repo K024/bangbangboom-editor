@@ -15,5 +15,7 @@ class AudioCtx {
   get destination() { return this._output }
 }
 
+window.AudioContext = window.AudioContext || (window as any).webkitAudioContext
+
 const globalctx = AudioContext && new AudioCtx()
 export default globalctx

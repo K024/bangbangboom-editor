@@ -29,6 +29,7 @@ const handelMouseTouchStart = (e: React.MouseEvent<HTMLDivElement> | React.Touch
   const viewport = e.currentTarget
   const bottom = viewport.getBoundingClientRect().bottom
   if ("buttons" in e) {
+    if (!(e.buttons & 1)) return // if not left down
     touchState.identifier = 1
     touchState.offsetY = bottom - e.clientY
   } else {
@@ -75,7 +76,8 @@ export default () => {
     if (div.current) {
       div.current.style.height = state.viewportheight + "px"
       if (Music.playing && MappingState.tracking) {
-        startAnimation(div.current, "transform", Music.position(), Music.duration, state.viewTransY, Music.remaintime())
+        startAnimation(div.current, "transform", MappingState.getViewposition(),
+          MappingState.viewduration, state.viewTransY, Music.remaintime())
       } else {
         stopAnimation(div.current, "transform", MappingState.getViewposition(), state.viewTransY)
       }

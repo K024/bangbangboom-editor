@@ -38,6 +38,11 @@ function drawOval(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.arcTo(x + 5, y - 5, x, y, 7)
   ctx.fill()
 }
+function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.beginPath()
+  ctx.ellipse(x, y, 5, 5, 0, 0, 2 * Math.PI)
+  ctx.fill()
+}
 
 export const drawScrollBar = (canvas: HTMLCanvasElement) => {
   const ctx = canvas.getContext("2d")
@@ -106,5 +111,17 @@ export const drawScrollBar = (canvas: HTMLCanvasElement) => {
         }
         break
     }
+  }
+}
+
+export const drawWarning = (canvas: HTMLCanvasElement) => {
+  const ctx = canvas.getContext("2d")
+  if (!ctx) return
+  ctx.fillStyle = "#ff8800"
+  for (const nid of MappingState.samePosNotes) {
+    const n = scope.map.notes.get(nid)
+    if (!n) return
+    const y = getY(n.realtimecache)
+    drawCircle(ctx, 93, y)
   }
 }

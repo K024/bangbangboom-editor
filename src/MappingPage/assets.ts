@@ -6,9 +6,9 @@ const assets = {
   note_slide_among: "/assets/mapping/note_slide_among.png",
   timing_tack: "/assets/mapping/timing_tack.wav",
   timing_tick: "/assets/mapping/timing_tick.wav",
-  perfect: "/assets/mapping/flick.mp3",
-  flick: "/assets/mapping/long.mp3",
-  long: "/assets/mapping/perfect.mp3",
+  perfect: "/assets/mapping/perfect.mp3",
+  flick: "/assets/mapping/flick.mp3",
+  long: "/assets/mapping/long.mp3",
 }
 
 for (const k in assets) {

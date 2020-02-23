@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import Button from "@material-ui/core/Button"
 import { TimingState } from "../sharedState"
 import { useTranslation } from "react-i18next"
@@ -47,42 +47,42 @@ function calcMeasure(taps: number[]) {
   return res
 }
 
+const state = {
+  taps: [] as number[],
+  timeoutId: undefined as any,
+}
+
+const startMeasure = (setLen: (v: number) => void) => {
+  const currentpos = Music.position()
+
+  state.taps.push(currentpos)
+  setLen(state.taps.length)
+  if (state.taps.length >= 5) {
+    const res = calcMeasure(state.taps)
+    TimingState.bpm = res.bpm
+    TimingState.time = res.offset
+  }
+  TimingState.measuring = true
+
+  clearTimeout(state.timeoutId)
+  state.timeoutId = setTimeout(() => {
+    state.taps.length = 0
+    TimingState.measuring = false
+    setLen(0)
+  }, 3000)
+}
 export default () => {
 
-  const s = useRef({
-    taps: [] as number[],
-    timeoutId: undefined as any,
-  })
   const [length, setLen] = useState(0)
 
-  const startMeasure = useCallback(() => {
-    const currentpos = Music.position()
-
-    s.current.taps.push(currentpos)
-    setLen(s.current.taps.length)
-    if (s.current.taps.length >= 5) {
-      const res = calcMeasure(s.current.taps)
-      TimingState.bpm = res.bpm
-      TimingState.time = res.offset
-    }
-    TimingState.measuring = true
-
-    clearTimeout(s.current.timeoutId)
-    s.current.timeoutId = setTimeout(() => {
-      s.current.taps.length = 0
-      TimingState.measuring = false
-      setLen(0)
-    }, 3000)
-  }, [])
-
-  useEffect(() => addHotkey("t", (e, he) => [
-    startMeasure()
-  ]), [startMeasure])
+  useEffect(() => addHotkey("t", () => [
+    startMeasure(setLen)
+  ]), [])
 
   const { t } = useTranslation()
 
   return useObserver(() =>
-    <Button fullWidth disableRipple onClick={startMeasure} disabled={!Music.playing}
+    <Button fullWidth disableRipple onClick={() => startMeasure(setLen)} disabled={!Music.playing}
       title={t("Hotkey: {{ hotkey }}", { hotkey: "t" })}>
       {!Music.playing
         ? t("Play the music to start measure")

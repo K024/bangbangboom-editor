@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import Box from "@material-ui/core/Box"
 import CssBaseline from "@material-ui/core/CssBaseline"
 import Fade from "@material-ui/core/Fade"
@@ -9,6 +9,7 @@ import MainContent from "./Components/MainContent"
 import HeaderBar from "./Components/HeaderBar"
 import FooterBar from "./Components/FooterBar"
 import GlobalSnackbar from "../Common/Components/GlobalSnackbar"
+import { Music } from "./states"
 
 const useStyles = makeStyles(theme => ({
   content: { position: "fixed", display: "flex", flexDirection: "column", top: 0, bottom: 0, left: 0, right: 0 },
@@ -18,6 +19,11 @@ const useStyles = makeStyles(theme => ({
 const MappingPage = () => {
 
   const cn = useStyles()
+
+  useEffect(() => () => {
+    if (Music.playing)
+      Music.toggle()
+  }, [])
 
   return (
     <ThemeProvider theme={theme}>

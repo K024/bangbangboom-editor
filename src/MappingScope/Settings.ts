@@ -23,7 +23,9 @@ export type Settings = {
     /** 1 | 2 | 3 | 4 | 6 | 8 | 16 | 48 */
     justify_grid_divisor: number
 
+    show_info_window: boolean
 
+    warn_for_same_pos_notes: boolean
   }
 
   game: {
@@ -33,6 +35,9 @@ export type Settings = {
 
 export const DefaultSettings: Settings = {
   general: { song_volume: 1, effect_volume: 1, background_dim: 0.7 },
-  editor: { keep_pitch: false, justify_find_nearest: true, justify_grid_divisor: 1 },
+  editor: {
+    keep_pitch: false, justify_find_nearest: true, justify_grid_divisor: 48, show_info_window: true,
+    warn_for_same_pos_notes: true
+  },
   game: {}
 }

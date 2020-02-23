@@ -17,7 +17,7 @@ import Button from "@material-ui/core/Button"
 
 
 const useStyles = makeStyles(theme => ({
-  table: { maxHeight: "60vh", overflow: "auto" },
+  table: { maxHeight: "60vh", overflow: "auto", "-webkit-overflow-scrolling": "touch" },
   tablerow: { cursor: "pointer" }
 }))
 

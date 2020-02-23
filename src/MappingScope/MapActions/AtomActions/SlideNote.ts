@@ -12,11 +12,11 @@ const add = (map: EditMap, id: number, slide: number, timepoint: number, offset:
 
   const s = assert(map.slides.get(slide))
   s.notes.push(id)
-  ResortSlide(map, s)
-
   map.notes.set(id, note)
 
   FreshNoteCache(map, note)
+  ResortSlide(map, s)
+
   return note
 }
 
@@ -26,9 +26,9 @@ const del = (map: EditMap, id: number) => {
 
   const s = assert(map.slides.get(note.slide))
   s.notes = s.notes.filter(x => x !== note.id)
-  ResortSlide(map, s)
-
   map.notes.delete(id)
+  
+  ResortSlide(map, s)
 
   return note
 }

@@ -1,7 +1,6 @@
 import React from "react"
 import { makeStyles } from "@material-ui/core/styles"
 import { useObserver } from "mobx-react-lite"
-import Box from "@material-ui/core/Box"
 import Grid from "@material-ui/core/Grid"
 import Typography from "@material-ui/core/Typography"
 import { useTranslation } from "react-i18next"
@@ -19,9 +18,6 @@ import FormLabel from "@material-ui/core/FormLabel"
 
 const useStyles = makeStyles(theme => ({
   panel: { width: "100%", maxWidth: 600, margin: "32px auto", },
-  root: { width: "100%", height: "100%", overflow: "hidden auto" },
-  expand: { height: "0", transition: "all 0.3s", overflow: "hidden", paddingTop: "0 !important", paddingBottom: "0 !important" },
-  active: { height: "80px", transition: "all 0.3s", }
 }))
 
 const SliderWrapper = (props: { children: React.ReactNode, label: React.ReactNode }) =>
@@ -95,7 +91,7 @@ const Editor = () => {
     </Grid>
     <Grid item>
       <FormControl fullWidth>
-        <InputLabel>{t("Grid divisor (of a quarter) to justify notes")}</InputLabel>
+        <InputLabel>{t("Grid divisor (of a quarter) to justify notes when justifying timepoint")}</InputLabel>
         <Select value={scope.settings.editor.justify_grid_divisor}
           onChange={e => scope.settings.editor.justify_grid_divisor = e.target.value as number}>
           <MenuItem value={1}>1 / 1</MenuItem>
@@ -109,6 +105,14 @@ const Editor = () => {
         </Select>
       </FormControl>
     </Grid>
+    <SwitchWrapper label={t("Show cursor infomation in mapping")}>
+      <Switch checked={scope.settings.editor.show_info_window}
+        onChange={(e, v) => scope.settings.editor.show_info_window = v} />
+    </SwitchWrapper>
+    <SwitchWrapper label={t("Show warning for same position notes")}>
+      <Switch checked={scope.settings.editor.warn_for_same_pos_notes}
+        onChange={(e, v) => scope.settings.editor.warn_for_same_pos_notes = v} />
+    </SwitchWrapper>
   </>)
 }
 
@@ -118,11 +122,9 @@ export default () => {
   const cn = useStyles()
 
   return (
-    <Box className={cn.root}>
-      <Grid className={cn.panel} container direction="column" spacing={4}>
-        <General />
-        <Divider style={{ margin: "32px -24px", width: "30%" }} />
-        <Editor />
-      </Grid>
-    </Box>)
+    <Grid className={cn.panel} container direction="column" spacing={4}>
+      <General />
+      <Divider style={{ margin: "32px -24px", width: "30%" }} />
+      <Editor />
+    </Grid>)
 }

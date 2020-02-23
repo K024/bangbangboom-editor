@@ -119,16 +119,24 @@ export function entryList<K, V>(map: Map<K, V> | DeepReadonly<Map<K, V>>) {
   return list
 }
 
+export function itemList<T>(_set: Set<T> | DeepReadonly<Set<T>>) {
+  const list: T[] = []
+  for (const i of _set.entries()) {
+    list.push(i[0])
+  }
+  return list
+}
+
 export function TimeToString(s: number) {
   if (s < 0) return "00:00:000"
-  let minutes = (s / 60) | 0
-  s -= minutes * 60
-  minutes += 100
-  let seconds = (s) | 0
-  s -= seconds
-  seconds += 100
-  let milis = (s * 1000 + 0.499) | 0
-  milis += 1000
+  let milis = (s * 1000 + 0.5) | 0
+  let minutes = (milis / 60000) | 0
+  milis = (milis % 60000) | 0
+  minutes = (minutes + 100) | 0
+  let seconds = (milis / 1000) | 0
+  milis = (milis % 1000) | 0
+  seconds = (seconds + 100) | 0
+  milis = (milis + 1000) | 0
   return minutes.toString().substr(1) + ":" + seconds.toString().substr(1) + "." + milis.toString().substr(1)
 }
 

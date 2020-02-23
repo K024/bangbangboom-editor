@@ -18,6 +18,7 @@ export class AtomHistory<TState> {
     const act = (state: TState) => fn(state, ...args)
     const res = act(this.state)
     if (res) {
+      this.act_todo.length = 0
       this.act_done.push(act)
       this.act_undo.push(res)
       return true

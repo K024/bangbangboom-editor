@@ -71,10 +71,14 @@ export class MapActionsBase extends CommonActions<EditMap> {
     const realtime = tp.time + tp.ticktimecache * offset
     const [rtp, rtpindex] = this.findTimepoint(realtime + tp.ticktimecache) // when its very near to next tp, switch to next
     if (rtp && rtp.id !== tp.id) return {
-      timepoint: rtp.id, offset: 0, timepointIndex: rtpindex
+      timepoint: rtp,
+      /** count of 1/48 quarter beat */
+      offset: 0, timepointIndex: rtpindex, realtime: rtp.time
     }
     return {
-      timepoint: tp.id, offset, timepointIndex: tpindex
+      timepoint: tp,
+      /** count of 1/48 quarter beat */
+      offset, timepointIndex: tpindex, realtime
     }
   }
 
@@ -95,8 +99,8 @@ export class MapActionsBase extends CommonActions<EditMap> {
     for (const n of notes) {
       FreshNoteCache(this.state, n)
       const res = assert(this.calcNearestPosition(n.realtimecache, division))
-      if (res.timepoint !== n.timepoint || res.offset !== n.offset) {
-        this.patchNote(n, res)
+      if (res.timepoint.id !== n.timepoint || res.offset !== n.offset) {
+        this.patchNote(n, { timepoint: res.timepoint.id, offset: res.offset })
       }
     }
   }
@@ -109,8 +113,8 @@ export class MapActionsBase extends CommonActions<EditMap> {
   protected justifyFindNearest(notes: NoteType[], division: number) {
     for (const n of notes) {
       const res = assert(this.calcNearestPosition(n.realtimecache, division))
-      if (res.timepoint !== n.timepoint || res.offset !== n.offset) {
-        this.patchNote(n, res)
+      if (res.timepoint.id !== n.timepoint || res.offset !== n.offset) {
+        this.patchNote(n, { timepoint: res.timepoint.id, offset: res.offset })
       }
     }
   }

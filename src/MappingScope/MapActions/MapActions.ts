@@ -1,4 +1,4 @@
-import { NoteType, SingleNote, FlickNote } from "../EditMap"
+import { NoteType, SingleNote, FlickNote, FreshNoteCache } from "../EditMap"
 import { SingleFlickActions } from "./AtomActions/SingleFlick"
 import { randomId, assert, neverHappen } from "../../Common/utils"
 import { SlideActions } from "./AtomActions/Slide"
@@ -78,30 +78,29 @@ export class MapActions extends MapActionsBase {
       this.history.callAtom(SlideActions.Set, slide, { flickend: !s.flickend })))
   }
 
-  timeMove(notes: NoteType[], timeoffset: number, min: number, max: number) {
+  addSlideMid(slide: number, timepoint: number, offset: number, lane: number) {
+    return this.done(this.history.doTransaction(() =>
+      this.history.callAtom(SlideNoteActions.Add, randomId(), slide, timepoint, offset, lane)))
+  }
+
+  moveMany(notes: NoteType[], timeoffset: number, min: number, max: number, laneoffset: number, division = 48) {
     return this.done(this.history.doTransaction(() => {
       for (const n of notes) {
-        const target = n.realtimecache + timeoffset
-        if (target > max || target < min) return false
-        n.realtimecache = target
+        const targetTime = n.realtimecache + timeoffset
+        const targetLane = n.lane + laneoffset
+        if (targetTime > max || targetTime < min || targetLane < 0 || targetLane > 6) {
+          for (const n of notes) FreshNoteCache(this.state, n)
+          return false
+        }
+        this.patchNote(n, { lane: targetLane })
+        n.realtimecache = targetTime
       }
-      this.justifyFindNearest(notes, 48)
+      this.justifyFindNearest(notes, division)
       return true
     }))
   }
 
-  laneMove(notes: NoteType[], laneoffset: number) {
-    return this.done(this.history.doTransaction(() => {
-      for (const n of notes) {
-        const target = n.lane + laneoffset
-        if (target < 0 || target > 6) return false
-        this.patchNote(n, { lane: target })
-      }
-      return true
-    }))
-  }
-
-  copyMany(notes: NoteType[], timeoffset: number, min: number, max: number) {
+  copyMany(notes: NoteType[], timeoffset: number, min: number, max: number, division = 48) {
     return this.done(this.history.doTransaction(() => {
       const slideidmap: { [key: number]: number } = {}
       const getSlide = (prevslideid: number) => {
@@ -117,13 +116,13 @@ export class MapActions extends MapActionsBase {
       for (const n of notes) {
         const target = n.realtimecache + timeoffset
         if (target > max || target < min) return false
-        const res = assert(this.calcNearestPosition(target, 48))
+        const res = assert(this.calcNearestPosition(target, division))
         if (n.type === "slide") {
           const slide = getSlide(n.slide)
-          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint, res.offset, n.lane)
+          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint.id, res.offset, n.lane)
           if (!done) return false
         } else {
-          const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint, res.offset, n.lane)
+          const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint.id, res.offset, n.lane)
           if (!done) return false
         }
       }

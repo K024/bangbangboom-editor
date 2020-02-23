@@ -5,7 +5,11 @@ import { useHashRoutes } from "../routes"
 import { makeStyles } from "@material-ui/core/styles"
 
 const useStyles = makeStyles(theme => ({
-  content: { flexGrow: 1, position: "relative", overflow: "hidden auto", }
+  content: { flexGrow: 1, position: "relative", overflow: "hidden", },
+  wrapping: {
+    width: "100%", height: "100%", overflowX: "hidden", overflowY: "auto",
+    "-webkit-overflow-scrolling": "touch", position: "absolute"
+  }
 }))
 
 export default () => {
@@ -16,7 +20,9 @@ export default () => {
   return (
     <Fade in key={path}>
       <Box className={cn.content}>
-        <Component />
+        <Box className={cn.wrapping}>
+          <Component />
+        </Box>
       </Box>
     </Fade>)
 }
