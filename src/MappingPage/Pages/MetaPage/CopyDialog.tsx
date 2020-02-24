@@ -22,7 +22,7 @@ export function openDialog(title: string, content: string) {
   dialog.title = title
 }
 
-export default () => {
+const CopyDialog = () => {
 
   const copy = () => {
     navigator.clipboard.writeText(dialog.content)
@@ -51,3 +51,5 @@ export default () => {
       </DialogActions>
     </Dialog >)
 }
+
+export default CopyDialog

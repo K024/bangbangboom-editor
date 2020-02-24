@@ -65,7 +65,7 @@ const RemoveBtn = () => {
     </Button>)
 }
 
-export default () => {
+const LeftPanel = () => {
 
   const { t } = useTranslation()
 
@@ -80,3 +80,5 @@ export default () => {
       </Grid>
     </Grid>)
 }
+
+export default LeftPanel

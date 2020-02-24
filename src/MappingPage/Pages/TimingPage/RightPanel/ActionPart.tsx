@@ -36,7 +36,7 @@ export const changed = () => {
   return tp.bpb !== TimingState.bpb || tp.bpm !== TimingState.bpm || tp.time !== TimingState.time
 }
 
-export default () => {
+const ActionPart = () => {
 
   const { t } = useTranslation()
   useMapChange()
@@ -65,3 +65,5 @@ export default () => {
       </Grid>
     </Grid>)
 }
+
+export default ActionPart

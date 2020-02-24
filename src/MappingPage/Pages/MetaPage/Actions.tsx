@@ -9,7 +9,7 @@ import { scope } from "../../../MappingScope/scope"
 import { openConfirm } from "./ConfirmDialog"
 
 
-export default () => {
+const Actions = () => {
 
   const { t } = useTranslation()
 
@@ -49,3 +49,5 @@ export default () => {
     </Grid>
   </>)
 }
+
+export default Actions

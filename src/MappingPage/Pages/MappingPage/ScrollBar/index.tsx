@@ -16,7 +16,7 @@ const handleScroll = (e: React.WheelEvent) => {
   MappingState.setViewposition(target)
 }
 
-export default () => {
+const ScrollBar = () => {
   const cn = useStyles()
   const container = useRef<HTMLDivElement>(null)
 
@@ -34,3 +34,5 @@ export default () => {
       <ViewPort />
     </div>)
 }
+
+export default ScrollBar

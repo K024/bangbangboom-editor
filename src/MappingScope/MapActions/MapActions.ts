@@ -83,7 +83,7 @@ export class MapActions extends MapActionsBase {
       this.history.callAtom(SlideNoteActions.Add, randomId(), slide, timepoint, offset, lane)))
   }
 
-  moveMany(notes: NoteType[], timeoffset: number, min: number, max: number, laneoffset: number, division = 48) {
+  moveMany(notes: NoteType[], timeoffset: number, min: number, max: number, laneoffset: number, division: number) {
     return this.done(this.history.doTransaction(() => {
       for (const n of notes) {
         const targetTime = n.realtimecache + timeoffset
@@ -100,29 +100,38 @@ export class MapActions extends MapActionsBase {
     }))
   }
 
-  copyMany(notes: NoteType[], timeoffset: number, min: number, max: number, division = 48) {
+  copyMany(notes: NoteType[], timeoffset: number, min: number, max: number, laneoffset: number, division: number) {
     return this.done(this.history.doTransaction(() => {
       const slideidmap: { [key: number]: number } = {}
-      const getSlide = (prevslideid: number) => {
-        if (slideidmap[prevslideid] === undefined) {
+      const slideNoteCount: { [key: number]: number } = {}
+      for (const n of notes) {
+        if (n.type === "slide")
+          slideNoteCount[n.slide] = (slideNoteCount[n.slide] && slideNoteCount[n.slide] + 1) || 1
+      }
+      for (const slide in slideNoteCount) {
+        const slideid = parseInt(slide)
+        if (slideNoteCount[slideid] >= 2) {
           const id = randomId()
           this.history.callAtom(SlideActions.Add, id,
-            assert(this.state.slides.get(prevslideid)).flickend)
-          slideidmap[prevslideid] = id
+            assert(this.state.slides.get(slideid)).flickend)
+          slideidmap[slideid] = id
         }
-        return slideidmap[prevslideid]
       }
 
       for (const n of notes) {
-        const target = n.realtimecache + timeoffset
-        if (target > max || target < min) return false
-        const res = assert(this.calcNearestPosition(target, division))
+        const targetTime = n.realtimecache + timeoffset
+        const targetLane = n.lane + laneoffset
+        if (targetTime > max || targetTime < min || targetLane < 0 || targetLane > 6) {
+          return false
+        }
+        const res = assert(this.calcNearestPosition(targetTime, division))
         if (n.type === "slide") {
-          const slide = getSlide(n.slide)
-          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint.id, res.offset, n.lane)
+          const slide = slideidmap[n.slide]
+          if (!slide) continue
+          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint.id, res.offset, targetLane)
           if (!done) return false
         } else {
-          const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint.id, res.offset, n.lane)
+          const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint.id, res.offset, targetLane)
           if (!done) return false
         }
       }

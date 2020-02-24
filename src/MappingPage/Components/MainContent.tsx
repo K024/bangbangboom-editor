@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default () => {
+const MainContent = () => {
 
   const cn = useStyles()
   const [path, Component] = useHashRoutes()
@@ -28,3 +28,4 @@ export default () => {
 }
 
 
+export default MainContent

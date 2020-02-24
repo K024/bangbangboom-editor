@@ -24,7 +24,7 @@ function calcGCD(a: number, b: number) {
   }
 }
 
-export default () => {
+const InfoWindow = () => {
 
   const cn = useStyles()
 
@@ -54,3 +54,5 @@ export default () => {
       </div>
     </div>)
 }
+
+export default InfoWindow

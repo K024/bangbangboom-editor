@@ -15,7 +15,7 @@ const movebeat = (beats: number) => {
   TimingState.time += beats * 60 / TimingState.bpm
 }
 
-export default () => {
+const EditPart = () => {
 
   const { t } = useTranslation()
 
@@ -56,3 +56,5 @@ export default () => {
       </Grid>
     </Grid>)
 }
+
+export default EditPart

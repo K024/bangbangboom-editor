@@ -22,7 +22,7 @@ const DelayNotice = () => {
   })
 }
 
-export default () => {
+const RightPanel = () => {
 
   return (
     <Grid item xs={12} sm container spacing={2} direction="column">
@@ -37,3 +37,5 @@ export default () => {
       <ActionPart />
     </Grid>)
 }
+
+export default RightPanel

@@ -74,7 +74,7 @@ const PlayTime = () => {
 }
 
 const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-  if (!(e.buttons & 1)) return // if not left down
+  if (!(e.buttons & 3)) return // if not left or right down
   const bar = e.currentTarget
   const x = e.pageX - bar.offsetLeft
   Music.seek(x / bar.clientWidth * Music.duration)
@@ -93,7 +93,7 @@ const handleScroll = (e: React.WheelEvent) => {
   Music.seek(target)
 }
 
-export default () => {
+const ProgressBar = () => {
 
   const cn = useStyles()
 
@@ -118,3 +118,5 @@ export default () => {
       </div>
     </div>)
 }
+
+export default ProgressBar

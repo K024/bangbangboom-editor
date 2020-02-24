@@ -16,7 +16,7 @@ const transY = (time: number, viewTime: number) => MappingState.timeHeightFactor
 
 const transpx = (t: number) => `translateY(${t}px)`
 
-export default () => {
+const ProgressLine = () => {
   const cn = useStyles()
   const div = useRef<HTMLDivElement>(null)
 
@@ -36,3 +36,5 @@ export default () => {
 
   return <div className={cn.progress} ref={div} />
 }
+
+export default ProgressLine

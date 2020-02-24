@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default () => {
+const BackgroundImage = () => {
 
   const cn = useStyles()
 
@@ -26,3 +26,4 @@ export default () => {
     />)
 }
 
+export default BackgroundImage

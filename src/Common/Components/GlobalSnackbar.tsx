@@ -47,7 +47,7 @@ const handleClose = (event: any, reason?: string) => {
   Message.open = false
 }
 
-export default () => {
+const GlobalSnackbar = () => {
 
   const cn = useStyles()
   const Icon = variantIcon[Message.type]
@@ -79,3 +79,5 @@ export default () => {
       />
     </Snackbar>))
 }
+
+export default GlobalSnackbar

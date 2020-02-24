@@ -106,7 +106,7 @@ function animloop(pads: HTMLDivElement[]) {
   lastbeat = currentBeat
 }
 
-export default () => {
+const TimingPad = () => {
 
   const cn = useStyles()
 
@@ -134,3 +134,5 @@ export default () => {
         </div>)}
     </div>)
 }
+
+export default TimingPad

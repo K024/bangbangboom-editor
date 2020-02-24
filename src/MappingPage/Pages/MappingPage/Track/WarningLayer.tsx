@@ -26,7 +26,7 @@ const WaringRect = ({ noteid }: { noteid: number }) => {
   return <Rect className={cn.note + " " + cn.noevent} style={style} />
 }
 
-export default () => {
+const WarningLayer = () => {
 
   const cn = useStyles()
   const layer = useMirror()
@@ -43,3 +43,5 @@ export default () => {
       {itemList(notes).map(id => <WaringRect key={id} noteid={id} />)}
     </div>)
 }
+
+export default WarningLayer

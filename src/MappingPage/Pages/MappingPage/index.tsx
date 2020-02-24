@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default () => {
+const MappingPage = () => {
 
   const cn = useStyles()
 
@@ -27,3 +27,5 @@ export default () => {
       <ScrollBar />
     </Box>)
 }
+
+export default MappingPage

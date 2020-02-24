@@ -24,7 +24,7 @@ export function openConfirm(title: string, content: string, confirm: () => void)
   dialog.confirm = confirm
 }
 
-export default () => {
+const ConfirmDialog = () => {
 
   const { t } = useTranslation()
 
@@ -44,3 +44,5 @@ export default () => {
       </DialogActions>
     </Dialog >)
 }
+
+export default ConfirmDialog

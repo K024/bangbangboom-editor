@@ -3,7 +3,7 @@ import TextField, { TextFieldProps } from "@material-ui/core/TextField"
 
 export type FileInputProps = { accept?: string, multiple?: boolean, onFileSelected?: (f: File[]) => any } & TextFieldProps
 
-export default forwardRef<HTMLDivElement, FileInputProps>((props, ref) => {
+const FileField = forwardRef<HTMLDivElement, FileInputProps>((props, ref) => {
 
   const {
     onFileSelected,
@@ -44,3 +44,5 @@ export default forwardRef<HTMLDivElement, FileInputProps>((props, ref) => {
       }}
       value={display} />)
 })
+
+export default FileField

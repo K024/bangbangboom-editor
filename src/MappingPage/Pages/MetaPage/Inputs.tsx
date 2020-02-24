@@ -69,8 +69,10 @@ const SelectBackground = () => {
     </FileFieldWrapper>)
 }
 
-export default () => <>
+const Inputs = () => <>
   <MapName />
   <SelectMusic />
   <SelectBackground />
 </>
+
+export default Inputs

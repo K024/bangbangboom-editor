@@ -117,7 +117,7 @@ const Editor = () => {
 }
 
 
-export default () => {
+const SettingsPage = () => {
 
   const cn = useStyles()
 
@@ -128,3 +128,5 @@ export default () => {
       <Editor />
     </Grid>)
 }
+
+export default SettingsPage

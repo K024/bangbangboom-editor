@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default () => {
+const ProgressLine = () => {
 
   const cn = useStyles()
   const div = useRef<HTMLDivElement>(null)
@@ -30,3 +30,5 @@ export default () => {
 
   return <div className={cn.progress} ref={div}></div>
 }
+
+export default ProgressLine

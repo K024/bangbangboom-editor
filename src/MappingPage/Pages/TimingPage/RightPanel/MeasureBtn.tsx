@@ -71,7 +71,7 @@ const startMeasure = (setLen: (v: number) => void) => {
     setLen(0)
   }, 3000)
 }
-export default () => {
+const MeasureBtn = () => {
 
   const [length, setLen] = useState(0)
 
@@ -93,3 +93,5 @@ export default () => {
             : t("Keep stable")}
     </Button>)
 }
+
+export default MeasureBtn

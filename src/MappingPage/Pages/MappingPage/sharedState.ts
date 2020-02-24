@@ -66,23 +66,14 @@ class State {
     return notes
   }
 
-  @computed get soundList() {
-    const list: { time: number, type: "single" | "flick" }[] = []
+  @computed get noteListOrdered() {
+    const list: NoteType[] = []
     if (this.mapChangeCounter) {
       for (const n of scope.map.notelist) {
-        if (n.type === "slide") {
-          const s = assert(scope.map.slides.get(n.slide))
-          if (s.flickend && n.id === s.notes[s.notes.length - 1])
-            list.push({ time: n.realtimecache, type: "flick" })
-          else
-            list.push({ time: n.realtimecache, type: "single" })
-        } else if (n.type === "flick")
-          list.push({ time: n.realtimecache, type: "flick" })
-        else
-          list.push({ time: n.realtimecache, type: "single" })
+        list.push(n)
       }
     }
-    return list.sort((a, b) => a.time - b.time)
+    return list.sort((a, b) => a.realtimecache - b.realtimecache)
   }
 
   constructor() {

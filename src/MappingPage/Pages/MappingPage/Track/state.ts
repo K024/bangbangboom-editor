@@ -3,6 +3,8 @@ import { MappingState } from "../sharedState"
 import { scope } from "../../../../MappingScope/scope"
 import { useRef, useEffect } from "react"
 import { Music } from "../../../states"
+import { itemList } from "../../../../Common/utils"
+import { NoteType } from "../../../../MappingScope/EditMap"
 
 class State {
 
@@ -51,19 +53,35 @@ class State {
   @observable slideNote1Beat: State["pointerBeat"]
   @observable slideNote1Lane = -1
 
-  @observable preventPanelClick = true
+  @observable preventClick = 0
 
   @observable draggingNote = -1
-
-  @observable twoFingers = false // for touch device to drag view port by two fingers
-  @observable twoFingerStartTime = 0 // average view time of fingers when start dragging by two fingers
 
   @observable selecting = false
   @observable selectingStartTime = 0
   @observable selectingStartLeft = 0
-  @observable selectingNotes = new Set<number>()
+  @observable selectingNotes: number[] = []
 
   @observable selectedNotes = new Set<number>()
+
+  getSelectedNotes = () => {
+    const selected = new Set<NoteType>()
+    for (const nid of this.selectedNotes) {
+      const n = scope.map.notes.get(nid)
+      if (n) selected.add(n)
+    }
+    for (const nid of this.selectingNotes) {
+      const n = scope.map.notes.get(nid)
+      if (n) selected.add(n)
+    }
+    return itemList(selected)
+  }
+
+  @computed get draggingSelected() {
+    const n = scope.map.notes.get(this.draggingNote)
+    if (!n) return false
+    return this.selectedNotes.has(n.id)
+  }
 
   constructor() {
     reaction(() => MappingState.tool, tool => {

@@ -8,7 +8,7 @@ export type NumberFieldProps = TextFieldProps & {
   onNumberChange?: (e: React.ChangeEvent, v: number) => void
 }
 
-export default forwardRef<HTMLDivElement, NumberFieldProps>((props, ref) => {
+const NumberField = forwardRef<HTMLDivElement, NumberFieldProps>((props, ref) => {
 
   const {
     number,
@@ -57,3 +57,5 @@ export default forwardRef<HTMLDivElement, NumberFieldProps>((props, ref) => {
       color={valid ? "primary" : "secondary"}>
     </TextField>)
 })
+
+export default NumberField

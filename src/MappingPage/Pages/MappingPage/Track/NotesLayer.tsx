@@ -5,46 +5,116 @@ import { useStyles, useNoteStyles } from "./styles"
 import assets from "../../../assets"
 import { assert, neverHappen } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
-import { useMapChange } from "../../../states"
+import { useMapChange, Music } from "../../../states"
 import { useMirror, state } from "./state"
 import { useObserver } from "mobx-react-lite"
 
 let dragPointer = -1
 const downEventHandler = (nid: number) => {
   return (e: React.MouseEvent<HTMLImageElement> | React.TouchEvent<HTMLImageElement>) => {
-    // const note = assert(scope.map.notes.get(nid))
-    if ("buttons" in e) {
-      dragPointer = 1
-    } else {
-      dragPointer = e.changedTouches[0].identifier
-    }
-    state.preventPanelClick = true
-    state.draggingNote = nid
     e.stopPropagation()
+    e.preventDefault()
+    const note = assert(scope.map.notes.get(nid))
+    if (dragPointer < 0) {
+      if ("buttons" in e) {
+        if (!(e.buttons & 3)) return
+        dragPointer = e.button
+      } else {
+        dragPointer = e.changedTouches[0].identifier
+      }
+    }
+    state.draggingNote = nid
+    if (!e.ctrlKey && !state.selectedNotes.has(note.id))
+      state.selectedNotes.clear()
+    state.slideNote1Beat = undefined
   }
 }
 
-window.addEventListener("mouseup", e => { dragPointer = -1; state.draggingNote = -1 })
-window.addEventListener("touchend", e => {
-  if (e.changedTouches[0].identifier === dragPointer) { dragPointer = -1; state.draggingNote = -1 }
-})
+const handleUp = (e: MouseEvent | TouchEvent) => {
+  if ("buttons" in e) {
+    if (e.button !== dragPointer) return
+  } else {
+    if (e.changedTouches[0].identifier !== dragPointer) return
+  }
+  dragPointer = -1
+  if (state.draggingNote >= 0) {
+    const note = assert(scope.map.notes.get(state.draggingNote))
+    const draggingSelected = state.draggingSelected
+    state.draggingNote = -1 // important: after get draggingselected !!!
+    if (!state.pointerBeat) return
+    if (state.pointerLane < 0) return
+    const dt = state.pointerBeat.realtime - note.realtimecache
+    const dl = state.pointerLane - note.lane
+    if (!dt && !dl) return
+
+    const before = new Set<number>()
+    const copy = e.ctrlKey
+    if (copy)
+      for (const n of scope.map.notelist) before.add(n.id)
+
+    if (draggingSelected) {
+      if (copy)
+        scope.map.copyMany(state.getSelectedNotes(), dt, 0, Music.duration, dl, MappingState.division)
+      else
+        scope.map.moveMany(state.getSelectedNotes(), dt, 0, Music.duration, dl, MappingState.division)
+    } else {
+      if (copy)
+        scope.map.copyMany([note], dt, 0, Music.duration, dl, MappingState.division)
+      else
+        scope.map.moveMany([note], dt, 0, Music.duration, dl, MappingState.division)
+    }
+
+    if (copy && scope.map.notelist.length !== before.size) {
+      state.selectedNotes.clear()
+      for (const n of scope.map.notelist) {
+        if (!before.has(n.id)) {
+          state.selectedNotes.add(n.id)
+        }
+      }
+    }
+
+    state.preventClick++
+    setTimeout(() => state.preventClick--, 50)
+  }
+}
+window.addEventListener("mouseup", handleUp)
+window.addEventListener("touchend", handleUp)
+
+const removeNote = (note: NoteType) => {
+  if (state.selectedNotes.has(note.id)) {
+    scope.map.removeNotes(state.getSelectedNotes())
+  } else {
+    scope.map.removeNotes([note])
+  }
+}
 
 const clickEventHandler = (nid: number) => {
   return (e: React.MouseEvent) => {
-    const note = assert(scope.map.notes.get(nid))
-    switch (MappingState.tool) {
-      case "delete":
-        scope.map.removeNotes([note])
-        break
-      default: break
-    }
     e.stopPropagation()
     e.preventDefault()
+    if (state.preventClick) return
+    const note = assert(scope.map.notes.get(nid))
+    if (e.ctrlKey) {
+      let id = 0
+      if (note.type === "slide") id = note.slide
+      else id = note.id
+      if (state.selectedNotes.has(id)) state.selectedNotes.delete(id)
+      else state.selectedNotes.add(id)
+    } else {
+      switch (MappingState.tool) {
+        case "delete":
+          removeNote(note)
+          break
+      }
+    }
   }
 }
 
 const doubleClickHandler = (nid: number) => {
   return (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (state.preventClick) return
     const note = assert(scope.map.notes.get(nid))
     if (note.type === "slide") {
       const s = assert(scope.map.slides.get(note.slide))
@@ -53,17 +123,16 @@ const doubleClickHandler = (nid: number) => {
     } else {
       scope.map.toggleFlick(note)
     }
-    e.stopPropagation()
-    e.preventDefault()
   }
 }
 
 const contextMenuHandler = (nid: number) => {
   return (e: React.MouseEvent<HTMLImageElement>) => {
-    const note = assert(scope.map.notes.get(nid))
-    scope.map.removeNotes([note])
     e.stopPropagation()
     e.preventDefault()
+    if (state.preventClick) return
+    const note = assert(scope.map.notes.get(nid))
+    removeNote(note)
   }
 }
 
@@ -84,7 +153,6 @@ const Note = ({ note }: { note: NoteType }) => {
 
   const props: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> = {
     onMouseDown: downHandler,
-    onTouchStart: downHandler,
     onContextMenu: ctxmenuHandler,
     onDoubleClick: doubleHandler,
     onClick: clickHandler,
@@ -111,7 +179,7 @@ const Note = ({ note }: { note: NoteType }) => {
   }
 }
 
-export default () => {
+const NotesLayer = () => {
 
   const cn = useStyles()
   const layer = useMirror()
@@ -122,3 +190,5 @@ export default () => {
       {scope.map.notelist.map(n => <Note key={n.id} note={n} />)}
     </div>)
 }
+
+export default NotesLayer

@@ -73,7 +73,7 @@ function slideScope() {
     mid(id: number) {
       if (a === id) return "A"
       if (b === id) return "B"
-      throw new Error("Map may corrupted")
+      throw new Error("Map may be corrupted")
     },
     end(id: number) {
       if (a === id) {
@@ -84,35 +84,8 @@ function slideScope() {
         b = null
         return "B"
       }
-      throw new Error("Map may corrupted")
+      throw new Error("Map may be corrupted")
     }
-  }
-}
-
-function magic(basebeat: number, lasttptime: number, lasttpbpm: number, lastnotebeat: number, nexttptime: number) {
-  const dt = nexttptime - lasttptime
-  const beattime = 60 / lasttpbpm
-  const beatsofffloat = dt / beattime
-  const beatsoff = Math.round(beatsofffloat)
-  if (Math.abs((beatsofffloat - beatsoff) * beattime) <= 1e-3) {
-    return {
-      insert: false as false,
-      nexttpbeat: basebeat + beatsoff
-    }
-  }
-  let properbeat = 0
-  while (properbeat < lastnotebeat) properbeat++
-  if (properbeat > beatsofffloat) throw new Error("Map may corrutp")
-
-  const ndt = nexttptime - lasttptime - beattime * properbeat
-  const nbeattime = ndt / (beatsoff - properbeat)
-  const nbpm = 60 / nbeattime
-
-  return {
-    insert: true as true,
-    insertat: basebeat + properbeat,
-    insertbpm: nbpm,
-    nexttpbeat: basebeat + beatsoff
   }
 }
 
@@ -133,23 +106,7 @@ export function toBestdoriFormat(map: EditMap) {
   let lasttp = tps[0]
   let tpbasebeat = 0
 
-  if (tps[0].time !== 0) {
-    const res = magic(0, 0, tps[0].bpm, 0, tps[0].time)
-    if (res.insert) {
-      bdmap.push({
-        type: "System", cmd: "BPM", beat: 0, bpm: res.insertbpm
-      })
-      bdmap.push({
-        type: "System", cmd: "BPM", beat: res.nexttpbeat, bpm: tps[0].bpm
-      })
-    } else {
-      bdmap.push({
-        type: "System", cmd: "BPM", beat: 0, bpm: tps[0].bpm
-      })
-    }
-    tpbasebeat = res.nexttpbeat
-    tpsPut.add(tps[0])
-  }
+  // todo
 
   let inote = 0
   let lastnotebeat = 0
@@ -159,25 +116,15 @@ export function toBestdoriFormat(map: EditMap) {
   while (inote < notes.length) {
     const n = notes[inote]
     const tp = map.timepoints.get(n.timepoint)
-    if (!tp) throw new Error("Map may corrupted")
+    if (!tp) throw new Error("Map may be corrupted")
     if (!tpsPut.has(tp)) {
 
-      const res = magic(tpbasebeat, lasttp.time, lasttp.bpm, lastnotebeat, tp.time)
-
-      if (res.insert) {
-        bdmap.push({
-          type: "System", cmd: "BPM", beat: res.insertat, bpm: res.insertbpm
-        })
-      }
-      bdmap.push({
-        type: "System", cmd: "BPM", beat: res.nexttpbeat, bpm: tp.bpm
-      })
+      // todo
 
       lasttp = tp
-      tpbasebeat = res.nexttpbeat
 
     } else {
-      if (lasttp !== tp) throw new Error("Map may corrupted")
+      if (lasttp !== tp) throw new Error("Map may be corrupted")
 
       const base: bdNoteBase = {
         type: "Note",
@@ -203,7 +150,7 @@ export function toBestdoriFormat(map: EditMap) {
           break
         case "slide":
           const sl = map.slides.get(n.slide)
-          if (!sl) throw new Error("Map may corrupted")
+          if (!sl) throw new Error("Map may be corrupted")
           const bdn: bdSlideNote = {
             ...base, note: "Slide", pos: "A"
           }

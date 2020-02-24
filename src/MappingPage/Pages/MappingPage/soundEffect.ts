@@ -1,4 +1,4 @@
-import { once } from "../../../Common/utils"
+import { once, assert } from "../../../Common/utils"
 import { AudioSource, loadFromUrl, AudioInstance } from "../../../Common/AudioCtx"
 import assets from "../../assets"
 import { useEffect } from "react"
@@ -6,7 +6,7 @@ import { MappingState } from "./sharedState"
 import { Music } from "../../states"
 import { binarySearch } from "../../../Common/binarySearch"
 import { createAnimLoop } from "../../../Common/hooks"
-import { autorun } from "mobx"
+import { autorun, observable } from "mobx"
 import { scope } from "../../../MappingScope/scope"
 
 const sounds = once(() => ({
@@ -25,9 +25,22 @@ const images = once(() => {
 
 let noSoundUntil = -1
 
+const soundlist = observable({
+  get list() {
+    return MappingState.noteListOrdered.map(x => {
+      if (x.type === "single") return { time: x.realtimecache, type: "single" }
+      if (x.type === "flick") return { time: x.realtimecache, type: "flick" }
+      const slide = assert(scope.map.slides.get(x.slide))
+      if (x.id === slide.notes[slide.notes.length - 1] && slide.flickend)
+        return { time: x.realtimecache, type: "flick" }
+      return { time: x.realtimecache, type: "single" }
+    })
+  }
+})
+
 function animloop() {
   if (Music.playing) {
-    const list = MappingState.soundList
+    const list = soundlist.list
     const position = Music.position()
 
     if (list.length <= 0) return

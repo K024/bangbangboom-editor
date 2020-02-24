@@ -10,7 +10,7 @@ import { Music } from "../../states"
 import { useObserver } from "mobx-react-lite"
 import { addHotkey } from "../../../Common/hooks"
 
-export default () => {
+const Tools = () => {
 
   const { t } = useTranslation()
 
@@ -38,3 +38,5 @@ export default () => {
     </Box>
   </>)
 }
+
+export default Tools

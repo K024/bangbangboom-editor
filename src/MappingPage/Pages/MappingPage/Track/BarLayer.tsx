@@ -41,12 +41,7 @@ const Bar = ({ from, to, layerWidth }: { from: NoteType, to: NoteType, layerWidt
 
   const handler = useMemo(() => clickHandler(slide), [slide])
 
-  const props: React.HTMLAttributes<HTMLDivElement> = {
-    onClick: handler, // for both click and touch
-    className: cn.slidebar,
-    style
-  }
-  return <div {...props}></div>
+  return <div className={cn.slidebar} onClick={handler} style={style}></div>
 }
 
 const forEachBar = (cb: (from: SlideNote, to: SlideNote) => any) => {
@@ -60,7 +55,7 @@ const forEachBar = (cb: (from: SlideNote, to: SlideNote) => any) => {
   }
 }
 
-export default () => {
+const BarLayer = () => {
 
   const cn = useStyles()
   const layer = useMirror()
@@ -84,3 +79,5 @@ export default () => {
       {list}
     </div>)
 }
+
+export default BarLayer

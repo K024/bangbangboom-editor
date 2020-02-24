@@ -79,7 +79,7 @@ const TimepointStart = () => {
 }
 
 
-export default () => {
+const GridLayer = () => {
   const cn = useLayerStyle()
   return (
     <div className={cn.layer}>
@@ -88,3 +88,5 @@ export default () => {
       <TimepointStart />
     </div>)
 }
+
+export default GridLayer

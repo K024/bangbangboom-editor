@@ -36,7 +36,7 @@ const Canvas = () => {
 const handelMouseTouch = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
   let clientY: number
   if ("buttons" in e) {
-    if (!(e.buttons & 1)) return
+    if (!(e.buttons & 3)) return
     clientY = e.clientY
   } else {
     clientY = e.changedTouches[0].clientY
@@ -49,7 +49,7 @@ const handelMouseTouch = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent
   MappingState.setViewposition(target)
 }
 
-export default () => {
+const CanvasBar = () => {
 
   const cn = useStyles()
   const bar = useRef<HTMLDivElement>(null)
@@ -73,3 +73,5 @@ export default () => {
       <ProgressLine />
     </div>)
 }
+
+export default CanvasBar

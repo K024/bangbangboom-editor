@@ -78,10 +78,12 @@ const HeaderActions = () => {
   </>
 }
 
-export default () => {
+const HeaderBar = () => {
 
   return (<>
     <HeaderTabs />
     <HeaderActions />
   </>)
 }
+
+export default HeaderBar

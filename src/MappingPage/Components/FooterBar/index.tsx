@@ -3,7 +3,7 @@ import ProgressBar from "./ProgressBar"
 import Tools from "./Tools"
 
 
-export default () => {
+const FooterBar = () => {
 
   return (<>
     <ProgressBar />
@@ -11,3 +11,4 @@ export default () => {
   </>)
 }
 
+export default FooterBar

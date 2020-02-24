@@ -9,7 +9,7 @@ const useStyles = makeStyles(theme => ({
   timing: { width: "100%", maxWidth: 1000, margin: "32px auto" },
 }))
 
-export default () => {
+const TimingPage = () => {
 
   const cn = useStyles()
 
@@ -19,3 +19,5 @@ export default () => {
       <RightPanel />
     </Grid>)
 }
+
+export default TimingPage

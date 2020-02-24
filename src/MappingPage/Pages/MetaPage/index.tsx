@@ -10,7 +10,7 @@ const useStyles = makeStyles(() => ({
   panel: { width: "100%", maxWidth: 600, margin: "64px auto", },
 }))
 
-export default () => {
+const MetaPage = () => {
 
   const cn = useStyles()
 
@@ -23,3 +23,5 @@ export default () => {
     </Grid>)
 
 }
+
+export default MetaPage

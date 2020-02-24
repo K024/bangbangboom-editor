@@ -28,13 +28,15 @@ const handelMouseTouchStart = (e: React.MouseEvent<HTMLDivElement> | React.Touch
   e.stopPropagation()
   const viewport = e.currentTarget
   const bottom = viewport.getBoundingClientRect().bottom
-  if ("buttons" in e) {
-    if (!(e.buttons & 1)) return // if not left down
-    touchState.identifier = 1
-    touchState.offsetY = bottom - e.clientY
-  } else {
-    touchState.identifier = e.changedTouches[0].identifier
-    touchState.offsetY = bottom - e.changedTouches[0].clientY
+  if (touchState.identifier < 0) {
+    if ("buttons" in e) {
+      if (!(e.buttons & 3)) return
+      touchState.identifier = e.button
+      touchState.offsetY = bottom - e.clientY
+    } else {
+      touchState.identifier = e.changedTouches[0].identifier
+      touchState.offsetY = bottom - e.changedTouches[0].clientY
+    }
   }
   touchState.container = e.currentTarget.parentElement
 }
@@ -42,7 +44,7 @@ const handelMouseTouchStart = (e: React.MouseEvent<HTMLDivElement> | React.Touch
 const handleMove = (e: MouseEvent | TouchEvent) => {
   let clientY: number
   if ("buttons" in e) {
-    if (touchState.identifier < 0 || !(e.buttons & 1)) return
+    if (touchState.identifier !== e.button) return
     clientY = e.clientY
   } else {
     if (touchState.identifier !== e.changedTouches[0].identifier) return
@@ -67,7 +69,7 @@ window.addEventListener("mouseleave", () => touchState.identifier = -1)
 window.addEventListener("mousemove", handleMove)
 window.addEventListener("touchmove", handleMove)
 
-export default () => {
+const ViewPort = () => {
 
   const cn = useStyles()
   const div = useRef<HTMLDivElement>(null)
@@ -88,3 +90,5 @@ export default () => {
     onMouseDown={handelMouseTouchStart}
     onTouchStart={handelMouseTouchStart} />
 }
+
+export default ViewPort

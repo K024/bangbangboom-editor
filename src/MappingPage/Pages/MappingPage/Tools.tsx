@@ -162,7 +162,7 @@ const OtherTools = () => {
     </Grid>)
 }
 
-export default () => {
+const Tools = () => {
   const cn = useStyles()
   return (
     <Box className={cn.tools}>
@@ -174,3 +174,5 @@ export default () => {
       </Grid>
     </Box>)
 }
+
+export default Tools
