@@ -41,6 +41,8 @@ type bdMapItem = bdBpm | bdSingleNote | bdSlideNote
 
 type bdMap = bdMapItem[]
 
+
+
 function format(map: bdMap) {
   const strb: string[] = []
   strb.push("[")
@@ -89,6 +91,23 @@ function slideScope() {
   }
 }
 
+function properBpmForSpan(time: number, preferred: number) {
+  for (let bpm = 30; bpm <= 60000; bpm++) {
+    const beattime = 60 / bpm
+    const beats = time / beattime
+    let beatcount = (beats + 0.5) | 0
+    const diff = beats > beatcount ? beats - beatcount : beatcount - beats
+    if (diff * beattime <= 1e-3) {
+      if (preferred % bpm === 0) {
+        const d = preferred / bpm
+        bpm *= d
+        beatcount *= d
+      }
+      return { bpm, beatcount }
+    }
+  }
+}
+
 export function toBestdoriFormat(map: EditMap) {
   const tps = entryList(map.timepoints).map(x => x[1]).sort((a, b) => a.time - b.time)
   if (tps.length <= 0) return "[]"
@@ -106,47 +125,66 @@ export function toBestdoriFormat(map: EditMap) {
   let lasttp = tps[0]
   let tpbasebeat = 0
 
-  // todo
+  {
+    if (lasttp.bpm !== (lasttp.bpm | 0)) throw new Error("Can not have float point bpm")
+    const res = properBpmForSpan(lasttp.time, lasttp.bpm)
+    if (!res) throw new Error("Can not calculate bpm insertion")
+    if (res.bpm === lasttp.bpm || res.beatcount <= 0) {
+      bdmap.push({ type: "System", cmd: "BPM", beat: 0, bpm: lasttp.bpm })
+    } else {
+      bdmap.push({ type: "System", cmd: "BPM", beat: 0, bpm: res.bpm })
+      bdmap.push({ type: "System", cmd: "BPM", beat: res.beatcount, bpm: lasttp.bpm })
+    }
+    tpbasebeat = res.beatcount
+    tpsPut.add(lasttp)
+  }
 
   let inote = 0
-  let lastnotebeat = 0
+  let lastnotebeat = tpbasebeat
 
   const scope = slideScope()
 
   while (inote < notes.length) {
-    const n = notes[inote]
+    const n = notes[inote++]
     const tp = map.timepoints.get(n.timepoint)
     if (!tp) throw new Error("Map may be corrupted")
     if (!tpsPut.has(tp)) {
 
-      // todo
+      if (tp.bpm !== (tp.bpm | 0)) throw new Error("Can not have float point bpm")
+      lastnotebeat = 0xfffff - ((0xfffff - lastnotebeat) | 0)
+      const lasttime = (lastnotebeat - tpbasebeat) * lasttp.ticktimecache * 48 + lasttp.time
+
+      const res = properBpmForSpan(tp.time - lasttime, tp.bpm)
+      if (!res) throw new Error("Can not calculate bpm insertion")
+
+      if (res.bpm === tp.bpm || res.beatcount <= 0) {
+        tpbasebeat = lastnotebeat + res.beatcount
+        bdmap.push({ type: "System", cmd: "BPM", beat: tpbasebeat, bpm: tp.bpm })
+      } else {
+        tpbasebeat = lastnotebeat + res.beatcount
+        bdmap.push({ type: "System", cmd: "BPM", beat: lastnotebeat, bpm: res.bpm })
+        bdmap.push({ type: "System", cmd: "BPM", beat: tpbasebeat, bpm: tp.bpm })
+      }
 
       lasttp = tp
+      lastnotebeat = tpbasebeat
+      tpsPut.add(tp)
 
     } else {
       if (lasttp !== tp) throw new Error("Map may be corrupted")
 
       const base: bdNoteBase = {
-        type: "Note",
-        beat: tpbasebeat + n.offset / 48,
-        lane: n.lane + 1
+        type: "Note", beat: tpbasebeat + n.offset / 48, lane: n.lane + 1
       }
 
       lastnotebeat = base.beat
 
       switch (n.type) {
         case "single":
-          bdmap.push({
-            ...base,
-            note: "Single",
-          })
+          bdmap.push({ ...base, note: "Single", })
           break
         case "flick":
-          bdmap.push({
-            ...base,
-            note: "Single",
-            flick: true
-          })
+          bdmap.push({ ...base, note: "Single", flick: true })
           break
         case "slide":
           const sl = map.slides.get(n.slide)
@@ -168,12 +206,8 @@ export function toBestdoriFormat(map: EditMap) {
           bdmap.push(bdn)
           break
       }
-
-
     }
   }
-
-
   return format(bdmap)
 }
 

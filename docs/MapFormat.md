@@ -1,7 +1,7 @@
 
 # V1
 
-## The previous map format
+## The **deprecated** map format
 
 ---
 

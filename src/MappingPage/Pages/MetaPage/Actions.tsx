@@ -7,12 +7,25 @@ import { userMessage } from "../../../Common/Components/GlobalSnackbar"
 import { toBestdoriFormat } from "../../../MapFormats/bestdori"
 import { scope } from "../../../MappingScope/scope"
 import { openConfirm } from "./ConfirmDialog"
+import { openFile } from "../../../Common/utils"
+import { fromBBBv1Format } from "../../../MapFormats/bbbv1"
 
 
 const Actions = () => {
 
   const { t } = useTranslation()
 
+  const importBBBv1 = async () => {
+    try {
+      const content = await openFile("*")
+      scope.reset(fromBBBv1Format(content))
+      userMessage(t("Import success"), "success")
+    } catch (error) {
+      if (!error) return
+      userMessage(t("Error import"), "error")
+      throw error
+    }
+  }
 
   const exportBestdori = () => {
     try {
@@ -37,6 +50,11 @@ const Actions = () => {
 
 
   return (<>
+    <Grid item>
+      <Button fullWidth variant="outlined" onClick={importBBBv1}>
+        {t("Import bangbangboom format v1 (current map will loss)")}
+      </Button>
+    </Grid>
     <Grid item>
       <Button fullWidth variant="outlined" onClick={exportBestdori}>
         {t("Export Bestdori format map")}

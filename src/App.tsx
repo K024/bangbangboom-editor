@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
 import MappingPage from './MappingPage'
+import { useGameState } from './GamePage/gamestate'
+import GamePage from './GamePage'
 
 
 const App = () => {
@@ -8,6 +10,10 @@ const App = () => {
     document.getElementById("loader")?.remove()
     document.getElementById("loader-style")?.remove()
   }, [])
+
+  const inGame = useGameState()
+
+  if (inGame) return <GamePage />
 
   return <MappingPage />
 }

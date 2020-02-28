@@ -127,8 +127,8 @@ export function itemList<T>(_set: Set<T> | DeepReadonly<Set<T>>) {
   return list
 }
 
-export function TimeToString(s: number) {
-  if (s < 0) return "00:00:000"
+export function TimeToString(s: number): string {
+  if (s < 0) return "-" + TimeToString(-s)
   let milis = (s * 1000 + 0.5) | 0
   let minutes = (milis / 60000) | 0
   milis = (milis % 60000) | 0
@@ -166,4 +166,25 @@ export function range(from: number, to?: number, step?: number) {
     from += step
   }
   return res
+}
+
+export function openFile(accept: string) {
+  return new Promise<string>((res, rej) => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = accept
+    input.onchange = e => {
+      let f: File | null
+      if (input.files && (f = input.files.item(0))) {
+        const reader = new FileReader()
+        reader.onload = e => res(reader.result as string)
+        reader.onerror = e => rej(e)
+        reader.readAsText(f)
+      } else {
+        rej()
+      }
+    }
+    input.oncancel = e => rej()
+    input.click()
+  })
 }

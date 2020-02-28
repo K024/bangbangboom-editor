@@ -14,6 +14,7 @@ import { useMapChange } from "../states"
 import { addHotkey } from "../../Common/hooks"
 import { useTranslation } from "react-i18next"
 import { userMessage } from "../../Common/Components/GlobalSnackbar"
+import { startGame } from "../../GamePage/gamestate"
 
 const useStyles = makeStyles(theme => ({
   tabs: { flexGrow: 1, height: "100%" }
@@ -25,17 +26,17 @@ const HeaderTabs = () => {
   const { t } = useTranslation()
   const [path] = useHashRoutes()
 
-  const tabs: { key: typeof path, label: string }[] = [
-    { key: "#meta", label: t("Meta") },
-    { key: "#timing", label: t("Timing") },
-    { key: "#mapping", label: t("Mapping") },
-    { key: "#settings", label: t("Settings") },
-  ]
+  const tabs = {
+    "#meta": t("Meta"),
+    "#timing": t("Timing"),
+    "#mapping": t("Mapping"),
+    "#settings": t("Settings")
+  }
 
   return (
-    <Tabs indicatorColor="primary" className={cn.tabs} value={path} onChange={(e, v) => NavigateTo(v)}>
-      {tabs.map(x =>
-        <Tab key={x.key} value={x.key} label={x.label} />)}
+    <Tabs indicatorColor="primary" className={cn.tabs} value={path in tabs ? path: "#meta"} onChange={(e, v) => NavigateTo(v)}>
+      {Object.keys(tabs).map(key =>
+        <Tab key={key} value={key} label={tabs[key as keyof typeof tabs]} />)}
     </Tabs>)
 }
 
@@ -66,7 +67,7 @@ const HeaderActions = () => {
     { children: <SaveAltIcon />, onClick: save, title: t("Hotkey: {{ hotkey }}", { hotkey: "ctrl + s" }) },
   ]
   const actionlist2 = [
-    { children: <PlayCircleFilledIcon />, onClick: () => void 0 },
+    { children: <PlayCircleFilledIcon />, onClick: startGame },
   ]
 
   return <>

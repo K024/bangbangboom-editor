@@ -8,7 +8,11 @@ import DialogActions from "@material-ui/core/DialogActions"
 import Button from "@material-ui/core/Button"
 import TextField from "@material-ui/core/TextField"
 import { useTranslation } from "react-i18next"
+import { makeStyles } from "@material-ui/core/styles"
 
+const useStyles = makeStyles(theme => ({
+  paper: { width: "calc(60vw + 200px)" }
+}))
 
 const dialog = observable({
   open: false,
@@ -33,10 +37,11 @@ const CopyDialog = () => {
     e.target.select()
   }
 
+  const cn = useStyles()
   const { t } = useTranslation()
 
   return useObserver(() =>
-    <Dialog open={dialog.open} onClose={() => dialog.open = false}>
+    <Dialog open={dialog.open} onClose={() => dialog.open = false} classes={{ paper: cn.paper }}>
       <DialogTitle>{dialog.title}</DialogTitle>
       <DialogContent>
         <TextField autoFocus onFocus={onfocus} fullWidth multiline rowsMax={20} variant="outlined" value={dialog.content} />

@@ -14,6 +14,7 @@ import Divider from "@material-ui/core/Divider"
 import Switch from "@material-ui/core/Switch"
 import { userMessage } from "../../../Common/Components/GlobalSnackbar"
 import FormLabel from "@material-ui/core/FormLabel"
+import NumberField from "../../../Common/Components/NumberField"
 
 
 const useStyles = makeStyles(theme => ({
@@ -21,8 +22,8 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const SliderWrapper = (props: { children: React.ReactNode, label: React.ReactNode }) =>
-  <Grid component={FormLabel} item container spacing={2} alignItems="center">
-    <Grid item style={{ width: 150 }}>
+  <Grid item container spacing={2} alignItems="center">
+    <Grid component={FormLabel} item style={{ width: 150 }}>
       <Typography>{props.label}</Typography></Grid>
     <Grid item xs>
       {props.children}
@@ -45,15 +46,15 @@ const General = () => {
       <Typography variant="h6">{t("General")}</Typography>
     </Grid>
     <SliderWrapper label={t("Song volume")}>
-      <Slider value={scope.settings.general.song_volume} min={0} max={1} step={0.01}
+      <Slider value={scope.settings.general.song_volume} min={0} max={1} step={0.01} valueLabelDisplay="auto"
         onChange={(e, v) => scope.settings.general.song_volume = v as number} />
     </SliderWrapper>
     <SliderWrapper label={t("Effect volume")}>
-      <Slider value={scope.settings.general.effect_volume} min={0} max={1} step={0.01}
+      <Slider value={scope.settings.general.effect_volume} min={0} max={1} step={0.01} valueLabelDisplay="auto"
         onChange={(e, v) => scope.settings.general.effect_volume = v as number} />
     </SliderWrapper>
     <SliderWrapper label={t("Background dim")}>
-      <Slider value={scope.settings.general.background_dim} min={0} max={1} step={0.01}
+      <Slider value={scope.settings.general.background_dim} min={0} max={1} step={0.01} valueLabelDisplay="auto"
         onChange={(e, v) => scope.settings.general.background_dim = v as number} />
     </SliderWrapper>
   </>)
@@ -115,6 +116,81 @@ const Editor = () => {
     </SwitchWrapper>
   </>)
 }
+let v: number
+const Game = () => {
+  const { t } = useTranslation()
+  return useObserver(() => <>
+    <Grid item>
+      <Typography variant="h6">{t("Game")}</Typography>
+    </Grid>
+    <Grid item container spacing={2}>
+      <Grid component={FormLabel} item xs={12}>
+        <Typography>{t("Judge offset (ms, smaller means you have to tap earlier)")}</Typography></Grid>
+      <Grid item xs>
+        <Slider value={scope.settings.game.judge_offset} min={-1000} max={1000} step={1} valueLabelDisplay="auto"
+          onChange={(e, v) => scope.settings.game.judge_offset = v as number} />
+      </Grid>
+      <Grid item style={{width: 72}}>
+        <NumberField inputProps={{ type: "number", step: "1", max: "1000", min: "-1000" }}
+          number={scope.settings.game.judge_offset}
+          validator={s => /^-?[0-9]+$/.test(s) && (v = parseInt(s), v <= 1000 && v >= -1000 && v)}
+          onNumberChange={(e, v) => scope.settings.game.judge_offset = v} />
+      </Grid>
+    </Grid>
+    <Grid item container spacing={2}>
+      <Grid component={FormLabel} item xs={12}>
+        <Typography>{t("Visual offset (ms, smaller means notes fall earlier)")}</Typography></Grid>
+      <Grid item xs>
+        <Slider value={scope.settings.game.visual_offset} min={-1000} max={1000} step={1} valueLabelDisplay="auto"
+          onChange={(e, v) => scope.settings.game.visual_offset = v as number} />
+      </Grid>
+      <Grid item style={{width: 72}}>
+        <NumberField inputProps={{ type: "number", step: "1", max: "1000", min: "-1000" }}
+          number={scope.settings.game.visual_offset}
+          validator={s => /^-?[0-9]+$/.test(s) && (v = parseInt(s), v <= 1000 && v >= -1000 && v)}
+          onNumberChange={(e, v) => scope.settings.game.visual_offset = v} />
+      </Grid>
+    </Grid>
+    <Grid item container spacing={2}>
+      <Grid component={FormLabel} item style={{ width: 150 }}>
+        <Typography>{t("Fall speed")}</Typography></Grid>
+      <Grid item xs>
+        <Slider value={scope.settings.game.speed} min={1} max={11} step={0.1} valueLabelDisplay="auto"
+          onChange={(e, v) => scope.settings.game.speed = v as number} />
+      </Grid>
+      <Grid item style={{width: 72}}>
+        <NumberField inputProps={{ type: "number", step: "0.1", max: "11", min: "1" }}
+          number={scope.settings.game.speed}
+          validator={s => /^[0-9]+(.[0-9]?)?$/.test(s) && (v = parseFloat(s), v <= 11 && v >= 1 && v)}
+          onNumberChange={(e, v) => scope.settings.game.speed = v} />
+      </Grid>
+    </Grid>
+    <SliderWrapper label={t("Resolution")}>
+      <Slider value={scope.settings.game.resolution} min={0.2} max={4} step={0.05} valueLabelDisplay="auto"
+        onChange={(e, v) => scope.settings.game.resolution = v as number} />
+    </SliderWrapper>
+    <SliderWrapper label={t("Slide bar opacity")}>
+      <Slider value={scope.settings.game.bar_opaciry} min={0} max={1} step={0.01} valueLabelDisplay="auto"
+        onChange={(e, v) => scope.settings.game.bar_opaciry = v as number} />
+    </SliderWrapper>
+    <SwitchWrapper label={t("Show simultaneou line")}>
+      <Switch checked={scope.settings.game.show_sim_line}
+        onChange={(e, v) => scope.settings.game.show_sim_line = v} />
+    </SwitchWrapper>
+    <SwitchWrapper label={t("Lane tap effect")}>
+      <Switch checked={scope.settings.game.lane_effect}
+        onChange={(e, v) => scope.settings.game.lane_effect = v} />
+    </SwitchWrapper>
+    <SwitchWrapper label={t("Mirror")}>
+      <Switch checked={scope.settings.game.mirror}
+        onChange={(e, v) => scope.settings.game.mirror = v} />
+    </SwitchWrapper>
+    <SwitchWrapper label={t("Rythem visual assist")}>
+      <Switch checked={scope.settings.game.beat_note}
+        onChange={(e, v) => scope.settings.game.beat_note = v} />
+    </SwitchWrapper>
+  </>)
+}
 
 
 const SettingsPage = () => {
@@ -126,6 +202,8 @@ const SettingsPage = () => {
       <General />
       <Divider style={{ margin: "32px -24px", width: "30%" }} />
       <Editor />
+      <Divider style={{ margin: "32px -24px", width: "30%" }} />
+      <Game />
     </Grid>)
 }
 

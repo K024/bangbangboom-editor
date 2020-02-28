@@ -22,6 +22,7 @@ export class CommonActions<T> {
   }
 
   ResetState = (state: T) => {
+    this.state = state
     this.history = new AtomHistory(state)
     this.act_done = []
     this.act_todo = []

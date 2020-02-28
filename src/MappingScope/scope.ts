@@ -55,8 +55,8 @@ class Scope {
     localStorage.setItem(StorageNames.mapcontent, json)
   }
 
-  reset = () => {
-    this.map.ResetState(EditMap.create())
+  reset = (map?: EditMap) => {
+    this.map.ResetState(map || EditMap.create())
   }
 
   @observable meta: Meta

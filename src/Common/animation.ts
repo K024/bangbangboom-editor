@@ -8,7 +8,7 @@ const Calibration = observable({
 
 setInterval(() => {
   Calibration.counter++
-}, 1000)
+}, 500)
 
 export function stopAnimation(el: HTMLElement, prop: AssignableCSSProps, value: number, unit: string | ((value: number) => string)) {
   el.style[prop] = unit instanceof Function ? unit(value) : value + unit

@@ -29,7 +29,16 @@ export type Settings = {
   }
 
   game: {
-
+    judge_offset: number
+    visual_offset: number
+    speed: number
+    resolution: number
+    note_scale: number
+    bar_opaciry: number
+    show_sim_line: boolean
+    lane_effect: boolean
+    mirror: boolean
+    beat_note: boolean
   }
 }
 
@@ -39,5 +48,8 @@ export const DefaultSettings: Settings = {
     keep_pitch: false, justify_find_nearest: true, justify_grid_divisor: 48, show_info_window: true,
     warn_for_same_pos_notes: true
   },
-  game: {}
+  game: {
+    judge_offset: 0, visual_offset: 0, speed: 10, resolution: 1.25, note_scale: 1, bar_opaciry: 0.9,
+    show_sim_line: true, lane_effect: true, mirror: false, beat_note: true,
+  }
 }

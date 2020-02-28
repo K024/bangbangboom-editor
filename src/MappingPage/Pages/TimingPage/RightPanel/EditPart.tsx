@@ -10,9 +10,19 @@ import IconButton from "@material-ui/core/IconButton"
 import Button from "@material-ui/core/Button"
 import { Music } from "../../../states"
 import InputAdornment from "@material-ui/core/InputAdornment"
+import { TimeToString } from "../../../../Common/utils"
 
 const movebeat = (beats: number) => {
   TimingState.time += beats * 60 / TimingState.bpm
+}
+
+function secondFromString(s: string) {
+  if (!/^-?([0-9]+:[0-9]{2}(.[0-9]+)?|[0-9]+(.[0-9]+)?)$/.test(s)) return false
+  const cindex = s.indexOf(":")
+  if (cindex < 0) return parseFloat(s)
+  const minutes = parseInt(s.substr(0, cindex))
+  const seconds = parseFloat(s.substr(cindex + 1))
+  return minutes * 60 + seconds
 }
 
 const EditPart = () => {
@@ -22,8 +32,8 @@ const EditPart = () => {
   return useObserver(() =>
     <Grid item container spacing={2}>
       <Grid item xs={12} sm={6}>
-        <NumberField fullWidth label={t("Time")} inputProps={{ type: "number", step: "0.001" }}
-          numberDisplay={i => i === (i | 0) ? i.toString() : i.toFixed(3)}
+        <NumberField fullWidth label={t("Time")}
+          numberDisplay={TimeToString} validator={secondFromString}
           number={TimingState.time} onNumberChange={(e, v) => TimingState.time = v} />
       </Grid>
       <Grid item xs={12} container alignItems="center">

@@ -58,7 +58,6 @@ const handleDown = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLD
 }
 const stopSelect = () => {
   if (!state.selecting) return
-  console.log("stop select")
   selectPointer = -1
   state.selecting = false
   for (const n of state.selectingNotes)
@@ -105,7 +104,6 @@ const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
   flushPointerPos(e)
   e.stopPropagation()
   if (state.preventClick) return
-  console.log("click")
   const beat = state.pointerBeat
   const lane = state.pointerLane
   if (!beat || lane < 0) return
