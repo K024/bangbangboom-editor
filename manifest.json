@@ -1,0 +1,20 @@
+{
+  "name": "bangbangboom-editor",
+  "short_name": "bbb-editor",
+  "icons": [
+    {
+      "src": "/favicon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e0e0e0",
+  "theme_color": "#e0e0e0"
+}
