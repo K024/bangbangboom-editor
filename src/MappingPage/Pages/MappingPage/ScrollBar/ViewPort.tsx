@@ -66,8 +66,8 @@ const handleMove = (e: MouseEvent | TouchEvent) => {
 
 window.addEventListener("mouseup", () => touchState.identifier = -1)
 window.addEventListener("mouseleave", () => touchState.identifier = -1)
-window.addEventListener("mousemove", handleMove)
-window.addEventListener("touchmove", handleMove)
+document.addEventListener("mousemove", handleMove)
+document.addEventListener("touchmove", handleMove)
 
 const ViewPort = () => {
 

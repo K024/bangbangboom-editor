@@ -76,6 +76,21 @@ const Editor = () => {
     <Grid item>
       <Typography variant="h6">{t("Editor")}</Typography>
     </Grid>
+    <Grid item container spacing={2}>
+      <Grid component={FormLabel} item xs={12}>
+        <Typography>
+          {t("Auto save interval (minutes, 0 to disable)")} &nbsp;&nbsp;
+          {t("Last save: {{ time }}", {
+            time: scope.lastSave
+              ? scope.lastSave.getHours() + ":" + scope.lastSave.getMinutes() + ":" + scope.lastSave.getSeconds()
+              : t("Never")
+          })}
+        </Typography></Grid>
+      <Grid item xs>
+        <Slider value={scope.settings.editor.autosave_interval} min={0} max={10} step={0.5} valueLabelDisplay="auto"
+          onChange={(e, v) => scope.settings.editor.autosave_interval = v as number} />
+      </Grid>
+    </Grid>
     <SwitchWrapper label={t("Keep pitch when changing playback rate")}>
       <Switch checked={scope.settings.editor.keep_pitch}
         onChange={changeKeepPitch} />
@@ -130,7 +145,7 @@ const Game = () => {
         <Slider value={scope.settings.game.judge_offset} min={-1000} max={1000} step={1} valueLabelDisplay="auto"
           onChange={(e, v) => scope.settings.game.judge_offset = v as number} />
       </Grid>
-      <Grid item style={{width: 72}}>
+      <Grid item style={{ width: 72 }}>
         <NumberField inputProps={{ type: "number", step: "1", max: "1000", min: "-1000" }}
           number={scope.settings.game.judge_offset}
           validator={s => /^-?[0-9]+$/.test(s) && (v = parseInt(s), v <= 1000 && v >= -1000 && v)}
@@ -144,7 +159,7 @@ const Game = () => {
         <Slider value={scope.settings.game.visual_offset} min={-1000} max={1000} step={1} valueLabelDisplay="auto"
           onChange={(e, v) => scope.settings.game.visual_offset = v as number} />
       </Grid>
-      <Grid item style={{width: 72}}>
+      <Grid item style={{ width: 72 }}>
         <NumberField inputProps={{ type: "number", step: "1", max: "1000", min: "-1000" }}
           number={scope.settings.game.visual_offset}
           validator={s => /^-?[0-9]+$/.test(s) && (v = parseInt(s), v <= 1000 && v >= -1000 && v)}
@@ -158,7 +173,7 @@ const Game = () => {
         <Slider value={scope.settings.game.speed} min={1} max={11} step={0.1} valueLabelDisplay="auto"
           onChange={(e, v) => scope.settings.game.speed = v as number} />
       </Grid>
-      <Grid item style={{width: 72}}>
+      <Grid item style={{ width: 72 }}>
         <NumberField inputProps={{ type: "number", step: "0.1", max: "11", min: "1" }}
           number={scope.settings.game.speed}
           validator={s => /^[0-9]+(.[0-9]?)?$/.test(s) && (v = parseFloat(s), v <= 11 && v >= 1 && v)}

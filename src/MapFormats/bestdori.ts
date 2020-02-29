@@ -58,15 +58,17 @@ function format(map: bdMap) {
 function slideScope() {
 
   let a: number | null = null
+  let abeat = 0
   let b: number | null = null
+  let bbeat = 0
 
   return {
-    start(id: number) {
-      if (a === null) {
+    start(id: number, beat: number) {
+      if (a === null && beat > abeat) {
         a = id
         return "A"
       }
-      if (b === null) {
+      if (b === null && beat > bbeat) {
         b = id
         return "B"
       }
@@ -77,13 +79,15 @@ function slideScope() {
       if (b === id) return "B"
       throw new Error("Map may be corrupted")
     },
-    end(id: number) {
+    end(id: number, beat: number) {
       if (a === id) {
         a = null
+        abeat = beat
         return "A"
       }
       if (b === id) {
         b = null
+        bbeat = beat
         return "B"
       }
       throw new Error("Map may be corrupted")
@@ -194,11 +198,11 @@ export function toBestdoriFormat(map: EditMap) {
           }
           if (sl.notes[0] === n.id) {
             bdn.start = true
-            bdn.pos = scope.start(sl.id)
+            bdn.pos = scope.start(sl.id, base.beat)
           }
           else if (sl.notes[sl.notes.length - 1] === n.id) {
             bdn.end = true
-            bdn.pos = scope.end(sl.id)
+            bdn.pos = scope.end(sl.id, base.beat)
             if (sl.flickend) bdn.flick = true
           } else {
             bdn.pos = scope.mid(sl.id)

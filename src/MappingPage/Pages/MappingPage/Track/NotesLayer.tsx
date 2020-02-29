@@ -92,14 +92,11 @@ const clickEventHandler = (nid: number) => {
   return (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
-    if (state.preventClick) return
+    // if (state.preventClick) return
     const note = assert(scope.map.notes.get(nid))
     if (e.ctrlKey) {
-      let id = 0
-      if (note.type === "slide") id = note.slide
-      else id = note.id
-      if (state.selectedNotes.has(id)) state.selectedNotes.delete(id)
-      else state.selectedNotes.add(id)
+      if (state.selectedNotes.has(note.id)) state.selectedNotes.delete(note.id)
+      else state.selectedNotes.add(note.id)
     } else {
       switch (MappingState.tool) {
         case "delete":

@@ -46,13 +46,27 @@ class Scope {
       const json = JSON.stringify(this.settings)
       localStorage.setItem(StorageNames.settings, json)
     })
+
+
+    this.map.changeListeners.add(() => {
+      if (this.settings.editor.autosave_interval > 0)
+        setTimeout(() => {
+          const now = new Date().getTime()
+          const timeout = this.settings.editor.autosave_interval * 60 * 1000
+          if (!this.lastSave || now - this.lastSave.getTime() > timeout)
+            this.save()
+        }, this.settings.editor.autosave_interval * 60 * 1000 - 1000)
+    })
   }
 
   map: MapActions
 
+  @observable lastSave: Date | null = null
+
   save = () => {
     const json = EditMap.toJsonString((this.map as any).state)
     localStorage.setItem(StorageNames.mapcontent, json)
+    this.lastSave = new Date()
   }
 
   reset = (map?: EditMap) => {

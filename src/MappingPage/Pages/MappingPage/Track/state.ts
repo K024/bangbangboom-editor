@@ -2,7 +2,6 @@ import { observable, computed, autorun, reaction } from "mobx"
 import { MappingState } from "../sharedState"
 import { scope } from "../../../../MappingScope/scope"
 import { useRef, useEffect } from "react"
-import { Music } from "../../../states"
 import { itemList } from "../../../../Common/utils"
 import { NoteType } from "../../../../MappingScope/EditMap"
 
@@ -20,8 +19,6 @@ class State {
     if (!panel) return 0
     const rect = panel.getBoundingClientRect()
     let res = (rect.bottom - this.pointerClientY) / MappingState.timeHeightFactor
-    if (res < 0) res = 0
-    else if (res >= Music.duration) res = Music.duration - 0.05
     return res
   }
 

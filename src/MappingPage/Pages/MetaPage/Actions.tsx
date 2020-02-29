@@ -7,8 +7,9 @@ import { userMessage } from "../../../Common/Components/GlobalSnackbar"
 import { toBestdoriFormat } from "../../../MapFormats/bestdori"
 import { scope } from "../../../MappingScope/scope"
 import { openConfirm } from "./ConfirmDialog"
-import { openFile } from "../../../Common/utils"
+import { openFile, downLoadFile } from "../../../Common/utils"
 import { fromBBBv1Format } from "../../../MapFormats/bbbv1"
+import { EditMap } from "../../../MappingScope/EditMap"
 
 
 const Actions = () => {
@@ -48,24 +49,51 @@ const Actions = () => {
       })
   }
 
+  const exportEditorMap = () => {
+    const content = EditMap.toJsonString(scope.map as any)
+    downLoadFile(content)
+  }
 
-  return (<>
-    <Grid item>
-      <Button fullWidth variant="outlined" onClick={importBBBv1}>
-        {t("Import bangbangboom format v1 (current map will loss)")}
-      </Button>
-    </Grid>
-    <Grid item>
-      <Button fullWidth variant="outlined" onClick={exportBestdori}>
-        {t("Export Bestdori format map")}
-      </Button>
-    </Grid>
-    <Grid item>
-      <Button fullWidth variant="outlined" onClick={reset}>
-        {t("Reset current map")}
-      </Button>
-    </Grid>
-  </>)
+  const importEditorMap = async () => {
+    try {
+      const content = await openFile("*")
+      scope.reset(EditMap.fromJson(content))
+      userMessage(t("Import success"), "success")
+    } catch (error) {
+      if (!error) return
+      userMessage(t("Error import"), "error")
+      throw error
+    }
+  }
+
+  return (
+    <Grid style={{margin: "20px 0"}} item container direction="column" spacing={2}>
+      <Grid item>
+        <Button fullWidth variant="outlined" onClick={importBBBv1}>
+          {t("Import bangbangboom format v1 (current map will loss)")}
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button fullWidth variant="outlined" onClick={exportBestdori}>
+          {t("Export Bestdori format map")}
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button fullWidth variant="outlined" onClick={exportEditorMap}>
+          {t("Download editor format map")}
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button fullWidth variant="outlined" onClick={importEditorMap}>
+          {t("Import editor format map (current map will loss)")}
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button fullWidth variant="outlined" onClick={reset}>
+          {t("Reset current map")}
+        </Button>
+      </Grid>
+    </Grid>)
 }
 
 export default Actions

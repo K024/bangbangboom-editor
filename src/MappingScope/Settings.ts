@@ -13,6 +13,7 @@ export type Settings = {
 
   editor: {
 
+    autosave_interval: number
     // global
 
     keep_pitch: boolean
@@ -46,7 +47,7 @@ export const DefaultSettings: Settings = {
   general: { song_volume: 1, effect_volume: 1, background_dim: 0.7 },
   editor: {
     keep_pitch: false, justify_find_nearest: true, justify_grid_divisor: 48, show_info_window: true,
-    warn_for_same_pos_notes: true
+    warn_for_same_pos_notes: true, autosave_interval: 5,
   },
   game: {
     judge_offset: 0, visual_offset: 0, speed: 10, resolution: 1.25, note_scale: 1, bar_opaciry: 0.9,

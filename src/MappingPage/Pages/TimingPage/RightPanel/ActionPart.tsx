@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid"
 import { useTranslation } from "react-i18next"
 import Button from "@material-ui/core/Button"
 import { TimingState } from "../sharedState"
-import { assert } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Switch from "@material-ui/core/Switch"
@@ -32,7 +31,11 @@ const settp = () => {
 export const changed = () => {
   const selected = TimingState.selected
   if (selected === null) return false
-  const tp = assert(scope.map.timepoints.get(selected))
+  const tp = scope.map.timepoints.get(selected)
+  if (!tp) {
+    TimingState.selected = null
+    return false
+  }
   return tp.bpb !== TimingState.bpb || tp.bpm !== TimingState.bpm || tp.time !== TimingState.time
 }
 

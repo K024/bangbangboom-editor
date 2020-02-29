@@ -61,7 +61,9 @@ const SelectTool = () => {
             <Tooltip placement="right"
               title={<Typography variant="body2">
                 {t("Double click to switch flick")} <br />
-                {t("Click the slide bar to add mid note")}
+                {t("Right click to delete note(s)")} <br />
+                {t("Click the slide bar to add mid note")} <br />
+                {t("Hold ctrl and drag to multi-select & copy notes")}
               </Typography>}>
               <HelpIcon fontSize="small" />
             </Tooltip></Grid>

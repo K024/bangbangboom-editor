@@ -1,3 +1,4 @@
+import { scope } from "../MappingScope/scope"
 
 export class RunIntoNeverError extends Error { }
 
@@ -166,6 +167,20 @@ export function range(from: number, to?: number, step?: number) {
     from += step
   }
   return res
+}
+
+export function downLoadFile(content: string | Blob) {
+  if (typeof content === "string")
+    content = new Blob([content])
+  const url = URL.createObjectURL(content)
+  const a = document.createElement("a")
+  a.style.display = "none"
+  a.href = url
+  a.download = (scope.meta.name || "No title") + " - bbbEditor.json"
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 export function openFile(accept: string) {

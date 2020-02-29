@@ -1,5 +1,4 @@
 import { observable, reaction } from "mobx"
-import { assert } from "../../../Common/utils"
 import { scope } from "../../../MappingScope/scope"
 
 
@@ -18,7 +17,8 @@ export const TimingState = observable({
 
 reaction(() => TimingState.selected, selected => {
   if (selected !== null) {
-    const tp = assert(scope.map.timepoints.get(selected))
+    const tp = scope.map.timepoints.get(selected)
+    if (!tp) return
     TimingState.bpm = tp.bpm
     TimingState.bpb = tp.bpb
     TimingState.time = tp.time

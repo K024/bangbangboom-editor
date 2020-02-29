@@ -24,7 +24,7 @@ const handleScroll = (e: React.WheelEvent<HTMLDivElement>) => {
   MappingState.setViewposition(target)
 }
 
-const flushPointerPos = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+const flushPointerPos = (e: MouseEvent | TouchEvent) => {
   if ("buttons" in e) {
     state.pointerClientX = e.clientX
     state.pointerClientY = e.clientY
@@ -37,7 +37,7 @@ const flushPointerPos = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<
 }
 
 let selectPointer = -1
-const handleDown = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+const handleDown = (e: MouseEvent | TouchEvent) => {
   e.stopPropagation()
   e.preventDefault()
   if (selectPointer < 0) {
@@ -51,7 +51,6 @@ const handleDown = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLD
   flushPointerPos(e)
   state.selectingStartLeft = state.pointerLeftPercent
   state.selectingStartTime = state.pointerTime
-
   if (!e.ctrlKey) {
     state.selectedNotes.clear()
   }
@@ -73,7 +72,7 @@ window.addEventListener("touchend", e => {
   if (e.changedTouches[0].identifier === selectPointer) stopSelect()
 })
 
-const handleMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+const handleMove = (e: MouseEvent | TouchEvent) => {
   flushPointerPos(e)
   if (!("buttons" in e) || e.buttons & 3) {
     if (state.draggingNote < 0 && !state.selecting)
@@ -91,7 +90,7 @@ const handleMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLD
     const end = binarySearch(i => list[i].realtimecache, list.length, state.selectingStartTime)[0]
     state.selectingNotes = (list.slice(Math.min(start, end), Math.max(start, end)))
       .filter(x => {
-        const left = x.lane * 10 + 15
+        const left = x.lane * 10 + 20
         const min = Math.min(state.pointerLeftPercent, state.selectingStartLeft)
         const max = Math.max(state.pointerLeftPercent, state.selectingStartLeft)
         if (left >= min && left <= max) return true
@@ -101,8 +100,9 @@ const handleMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLD
 }
 
 const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-  flushPointerPos(e)
+  flushPointerPos(e.nativeEvent)
   e.stopPropagation()
+  e.preventDefault()
   if (state.preventClick) return
   const beat = state.pointerBeat
   const lane = state.pointerLane
@@ -141,10 +141,18 @@ const Track = () => {
     }
   }), [])
 
+  useEffect(() => {
+    window.addEventListener("mousedown", handleDown)
+    window.addEventListener("mousemove", handleMove)
+    return () => {
+      window.removeEventListener("mousedown", handleDown)
+      window.removeEventListener("mousemove", handleMove)
+    }
+  }, [])
+
   return (
     <div className={cn.track}>
-      <div className={cn.panel} ref={state.panelRef} onWheel={handleScroll} onClick={handleClick}
-        onMouseMove={handleMove} onMouseDown={handleDown}>
+      <div className={cn.panel} ref={state.panelRef} onWheel={handleScroll} onClick={handleClick}>
         <GridLayer />
         <BarLayer />
         <NotesLayer />

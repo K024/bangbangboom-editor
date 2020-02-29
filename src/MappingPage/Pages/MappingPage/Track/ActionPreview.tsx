@@ -4,7 +4,7 @@ import { useObserver } from "mobx-react-lite"
 import { state, useMirror } from "./state"
 import { MappingState } from "../sharedState"
 import { Cross, Rect } from "./SVGs"
-import { assert, entryList } from "../../../../Common/utils"
+import { entryList } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
 import { useMapChange } from "../../../states"
 
@@ -54,7 +54,8 @@ const DragOneNote = () => {
   const style = useObserver(() => {
     if (state.draggingNote < 0) return
     if (state.pointerLane < 0) return
-    const n = assert(scope.map.notes.get(state.draggingNote))
+    const n = scope.map.notes.get(state.draggingNote)
+    if (!n) return
     const beat = state.pointerBeat
     if (!beat) return
     const time = beat.realtime
