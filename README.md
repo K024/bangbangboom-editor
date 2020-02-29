@@ -7,5 +7,8 @@ An editor to create bang dream beat map.
 
 Do not expect this editor to work perfectly.
 
-You can access missing translation keys by global variable `missingKeys` and check for i18next instance `i18n` .  
+## Help improve translations
+
+You can access missing translation keys by global variable `missingKeys` and check for i18next instance `i18n` .
+
 You can start a pull request to commit your translations at `src/public/locales/{lng}.json` .

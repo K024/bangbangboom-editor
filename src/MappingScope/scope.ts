@@ -69,6 +69,8 @@ class Scope {
     this.lastSave = new Date()
   }
 
+  @observable update = false
+
   reset = (map?: EditMap) => {
     this.map.ResetState(map || EditMap.create())
   }

@@ -21,6 +21,13 @@ const useStyles = makeStyles(theme => ({
   panel: { width: "100%", maxWidth: 600, margin: "32px auto", },
 }))
 
+function timeFormat(date: Date) {
+  const hh = (date.getHours() + 100).toString().substr(1)
+  const mm = (date.getMinutes() + 100).toString().substr(1)
+  const ss = (date.getSeconds() + 100).toString().substr(1)
+  return `${hh}:${mm}:${ss}`
+}
+
 const SliderWrapper = (props: { children: React.ReactNode, label: React.ReactNode }) =>
   <Grid item container spacing={2} alignItems="center">
     <Grid component={FormLabel} item style={{ width: 150 }}>
@@ -40,7 +47,7 @@ const SwitchWrapper = (props: { children: React.ReactNode, label: React.ReactNod
   </Grid>
 
 const General = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   return useObserver(() => <>
     <Grid item>
       <Typography variant="h6">{t("General")}</Typography>
@@ -57,6 +64,17 @@ const General = () => {
       <Slider value={scope.settings.general.background_dim} min={0} max={1} step={0.01} valueLabelDisplay="auto"
         onChange={(e, v) => scope.settings.general.background_dim = v as number} />
     </SliderWrapper>
+    <Grid item>
+      <FormControl fullWidth>
+        <InputLabel>{t("Preferred language (some items maybe missing)")}</InputLabel>
+        <Select value={i18n.language}
+          onChange={e => i18n.changeLanguage(e.target.value as string)}>
+          <MenuItem value="en">English</MenuItem>
+          <MenuItem value="zh">简体中文</MenuItem>
+          <MenuItem value="ja">日本語</MenuItem>
+        </Select>
+      </FormControl>
+    </Grid>
   </>)
 }
 
@@ -66,7 +84,7 @@ const Editor = () => {
   const changeKeepPitch = (e: any, v: boolean) => {
     scope.settings.editor.keep_pitch = v
     if (v) {
-      userMessage(t("This may cause unstable delay of song. ") + t("Please reload the music to activate"), "warning")
+      userMessage(t("This may cause unstable delay of song.") + " " + t("Please reload the music to activate"), "warning")
     } else {
       userMessage(t("Please reload the music to activate"), "warning")
     }
@@ -81,9 +99,7 @@ const Editor = () => {
         <Typography>
           {t("Auto save interval (minutes, 0 to disable)")} &nbsp;&nbsp;
           {t("Last save: {{ time }}", {
-            time: scope.lastSave
-              ? scope.lastSave.getHours() + ":" + scope.lastSave.getMinutes() + ":" + scope.lastSave.getSeconds()
-              : t("Never")
+            time: scope.lastSave ? timeFormat(scope.lastSave) : t("Never")
           })}
         </Typography></Grid>
       <Grid item xs>
@@ -121,7 +137,7 @@ const Editor = () => {
         </Select>
       </FormControl>
     </Grid>
-    <SwitchWrapper label={t("Show cursor infomation in mapping")}>
+    <SwitchWrapper label={t("Show cursor information in mapping")}>
       <Switch checked={scope.settings.editor.show_info_window}
         onChange={(e, v) => scope.settings.editor.show_info_window = v} />
     </SwitchWrapper>
@@ -188,7 +204,7 @@ const Game = () => {
       <Slider value={scope.settings.game.bar_opaciry} min={0} max={1} step={0.01} valueLabelDisplay="auto"
         onChange={(e, v) => scope.settings.game.bar_opaciry = v as number} />
     </SliderWrapper>
-    <SwitchWrapper label={t("Show simultaneou line")}>
+    <SwitchWrapper label={t("Show simultaneous line")}>
       <Switch checked={scope.settings.game.show_sim_line}
         onChange={(e, v) => scope.settings.game.show_sim_line = v} />
     </SwitchWrapper>
@@ -200,7 +216,7 @@ const Game = () => {
       <Switch checked={scope.settings.game.mirror}
         onChange={(e, v) => scope.settings.game.mirror = v} />
     </SwitchWrapper>
-    <SwitchWrapper label={t("Rythem visual assist")}>
+    <SwitchWrapper label={t("Rhythm visual assist")}>
       <Switch checked={scope.settings.game.beat_note}
         onChange={(e, v) => scope.settings.game.beat_note = v} />
     </SwitchWrapper>

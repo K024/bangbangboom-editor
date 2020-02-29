@@ -64,7 +64,7 @@ const ActionPart = () => {
         <FormControlLabel style={{ marginLeft: "auto" }}
           control={<Switch checked={TimingState.autoswitchtp}
             onChange={(e, v) => TimingState.autoswitchtp = v} />}
-          label={t("Auto swich selected timepoint")} labelPlacement="start" />
+          label={t("Auto switch selected timepoint")} labelPlacement="start" />
       </Grid>
     </Grid>)
 }

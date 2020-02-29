@@ -5,7 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.9.4",
     "@material-ui/icons": "^4.9.1",
-    "bangbangboom-game": "file:../bangbangboom-game",
+    "bangbangboom-game": "git+https://github.com/K024/bangbangboom-game",
     "clsx": "^1.1.0",
     "hotkeys-js": "^3.7.3",
     "i18next": "^19.3.2",

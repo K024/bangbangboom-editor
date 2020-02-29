@@ -40,6 +40,9 @@ let selectPointer = -1
 const handleDown = (e: MouseEvent | TouchEvent) => {
   e.stopPropagation()
   e.preventDefault()
+  if (document.activeElement && "blur" in document.activeElement) {
+    (document.activeElement as HTMLElement).blur()
+  }
   if (selectPointer < 0) {
     if ("buttons" in e) {
       if (!(e.buttons & 3)) return

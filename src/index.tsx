@@ -6,6 +6,7 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { userMessage } from './Common/Components/GlobalSnackbar'
 import i18n from './i18n'
+import { scope } from './MappingScope/scope'
 
 ReactDOM.render(<App />, document.getElementById('root'))
 
@@ -14,6 +15,7 @@ ReactDOM.render(<App />, document.getElementById('root'))
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.register({
   onUpdate() {
-    userMessage(i18n.t("An update is available. Please close ALL tabs of this site and reload."), "info")
+    userMessage(i18n.t("An update is available. Please close ALL tabs of this site or press Ctrl + F5 reload."), "info")
+    scope.update = true
   }
 })
