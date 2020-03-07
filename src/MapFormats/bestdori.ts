@@ -174,42 +174,41 @@ export function toBestdoriFormat(map: EditMap) {
       lastnotebeat = tpbasebeat
       tpsPut.add(tp)
 
-    } else {
-      if (lasttp !== tp) throw new Error("Map may be corrupted")
+    }
+    if (lasttp !== tp) throw new Error("Map may be corrupted")
 
-      const base: bdNoteBase = {
-        type: "Note", beat: tpbasebeat + n.offset / 48, lane: n.lane + 1
-      }
+    const base: bdNoteBase = {
+      type: "Note", beat: tpbasebeat + n.offset / 48, lane: n.lane + 1
+    }
 
-      lastnotebeat = base.beat
+    lastnotebeat = base.beat
 
-      switch (n.type) {
-        case "single":
-          bdmap.push({ ...base, note: "Single", })
-          break
-        case "flick":
-          bdmap.push({ ...base, note: "Single", flick: true })
-          break
-        case "slide":
-          const sl = map.slides.get(n.slide)
-          if (!sl) throw new Error("Map may be corrupted")
-          const bdn: bdSlideNote = {
-            ...base, note: "Slide", pos: "A"
-          }
-          if (sl.notes[0] === n.id) {
-            bdn.start = true
-            bdn.pos = scope.start(sl.id, base.beat)
-          }
-          else if (sl.notes[sl.notes.length - 1] === n.id) {
-            bdn.end = true
-            bdn.pos = scope.end(sl.id, base.beat)
-            if (sl.flickend) bdn.flick = true
-          } else {
-            bdn.pos = scope.mid(sl.id)
-          }
-          bdmap.push(bdn)
-          break
-      }
+    switch (n.type) {
+      case "single":
+        bdmap.push({ ...base, note: "Single", })
+        break
+      case "flick":
+        bdmap.push({ ...base, note: "Single", flick: true })
+        break
+      case "slide":
+        const sl = map.slides.get(n.slide)
+        if (!sl) throw new Error("Map may be corrupted")
+        const bdn: bdSlideNote = {
+          ...base, note: "Slide", pos: "A"
+        }
+        if (sl.notes[0] === n.id) {
+          bdn.start = true
+          bdn.pos = scope.start(sl.id, base.beat)
+        }
+        else if (sl.notes[sl.notes.length - 1] === n.id) {
+          bdn.end = true
+          bdn.pos = scope.end(sl.id, base.beat)
+          if (sl.flickend) bdn.flick = true
+        } else {
+          bdn.pos = scope.mid(sl.id)
+        }
+        bdmap.push(bdn)
+        break
     }
   }
   return format(bdmap)
