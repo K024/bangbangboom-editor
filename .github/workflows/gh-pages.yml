@@ -24,8 +24,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: npm ci
-      - run: npm run build
+      - name: Restore
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          REACT_APP_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

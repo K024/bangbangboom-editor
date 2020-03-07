@@ -1,4 +1,4 @@
-import { once, assert } from "../../../Common/utils"
+import { once, assert, itemList } from "../../../Common/utils"
 import { AudioSource, loadFromUrl, AudioInstance } from "../../../Common/AudioCtx"
 import assets from "../../assets"
 import { useEffect } from "react"
@@ -38,6 +38,8 @@ const soundlist = observable({
   }
 })
 
+const toBeStopped = new Set<AudioInstance>()
+
 function animloop() {
   if (Music.playing) {
     const list = soundlist.list
@@ -51,18 +53,24 @@ function animloop() {
     const time = list[index].time
     if (time > position + 0.05) return
     if (time < noSoundUntil) return
-    noSoundUntil = time + 0.01
+    noSoundUntil = time + 0.01 * Music.playbackrate
 
     const s = sounds()
 
     while (index < list.length && list[index].time < noSoundUntil) {
-      new AudioInstance(list[index].type === "single" ? s.perfect : s.flick)
-        .play(list[index].time - position)
+      const au = new AudioInstance(list[index].type === "single" ? s.perfect : s.flick)
+      au.play((list[index].time - position) / Music.playbackrate)
+      au.onend.add(() => toBeStopped.delete(au))
+      toBeStopped.add(au)
       index++
     }
 
   } else {
     noSoundUntil = -1
+    for (const au of itemList(toBeStopped)) {
+      au.stop()
+    }
+    toBeStopped.clear()
   }
 }
 

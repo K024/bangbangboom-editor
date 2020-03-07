@@ -8,6 +8,13 @@ import { userMessage } from './Common/Components/GlobalSnackbar'
 import i18n from './i18n'
 import { scope } from './MappingScope/scope'
 
+window.addEventListener("error", ev => {
+  gtag('event', 'exception', {
+    'description': ev.error,
+    'fatal': true
+  })
+})
+
 ReactDOM.render(<App />, document.getElementById('root'))
 
 // If you want your app to work offline and load faster, you can change
