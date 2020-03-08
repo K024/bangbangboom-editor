@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react"
 import { makeStyles } from "@material-ui/core/styles"
-import { autorun } from "mobx"
-import { Music, useMapChange } from "../../../states"
+import { autorun, observable } from "mobx"
+import { Music } from "../../../states"
 import { startAnimation, stopAnimation } from "../../../../Common/animation"
 import { state } from "./state"
 import { MappingState } from "../sharedState"
@@ -15,22 +15,29 @@ const useStyles = makeStyles(theme => ({
   canvas: { width: "100%", height: "100%" },
 }))
 
+const canvas = observable({
+  current: null as HTMLCanvasElement | null
+})
+
+autorun(() => {
+  if (canvas.current) {
+    canvas.current.height = state.barHeight
+    drawScrollBar(canvas.current)
+    if (scope.settings.editor.warn_for_same_pos_notes)
+      drawWarning(canvas.current)
+  }
+})
+
 const Canvas = () => {
   const cn = useStyles()
-  const canvas = useRef<HTMLCanvasElement>(null)
+  const ref = useRef<HTMLCanvasElement>(null)
 
-  const change = useMapChange()
+  useEffect(() => {
+    canvas.current = ref.current
+    return () => { canvas.current = null }
+  }, [])
 
-  useEffect(() => autorun(() => {
-    if (canvas.current && change) {
-      canvas.current.height = state.barHeight
-      drawScrollBar(canvas.current)
-      if (scope.settings.editor.warn_for_same_pos_notes)
-        drawWarning(canvas.current)
-    }
-  }), [change])
-
-  return <canvas ref={canvas} className={cn.canvas} width={100}></canvas>
+  return <canvas ref={ref} className={cn.canvas} width={100}></canvas>
 }
 
 const handelMouseTouch = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -41,7 +48,6 @@ const handelMouseTouch = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent
   } else {
     clientY = e.changedTouches[0].clientY
   }
-  e.stopPropagation()
 
   const target = (e.currentTarget.getBoundingClientRect().bottom - clientY - state.viewportheight / 2)
     / state.barHeight * MappingState.paddedDuration

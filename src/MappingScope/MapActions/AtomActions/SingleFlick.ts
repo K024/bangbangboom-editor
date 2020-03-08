@@ -1,12 +1,13 @@
 import { EditMap, SingleNote, FlickNote, FreshNoteCache } from "../../EditMap"
 import { makeAction } from "./types"
 import { neverHappen, shallowPatch, assert } from "../../../Common/utils"
+import { observable } from "mobx"
 
 type SingleOrFlick = (SingleNote | FlickNote)
 
 const add = (map: EditMap, id: number, type: SingleOrFlick["type"], timepoint: number, offset: number, lane: number) => {
   const note =
-    { type: type as "single", id, timepoint, offset, lane, realtimecache: 0 } as SingleOrFlick
+    observable({ type: type as "single", id, timepoint, offset, lane, realtimecache: 0 }) as SingleOrFlick
 
   map.notes.set(note.id, note)
 

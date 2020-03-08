@@ -1,6 +1,6 @@
 import React from "react"
 import Dialog from "@material-ui/core/Dialog"
-import { observable } from "mobx"
+import { observable, action } from "mobx"
 import { useObserver } from "mobx-react-lite"
 import DialogTitle from "@material-ui/core/DialogTitle"
 import DialogContent from "@material-ui/core/DialogContent"
@@ -20,22 +20,21 @@ const dialog = observable({
   title: ""
 })
 
-export function openDialog(title: string, content: string) {
+export const openDialog = action(function (title: string, content: string) {
   dialog.open = true
   dialog.content = content
   dialog.title = title
+})
+
+const copy = () => {
+  navigator.clipboard.writeText(dialog.content)
+}
+
+const onfocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+  e.target.select()
 }
 
 const CopyDialog = () => {
-
-  const copy = () => {
-    navigator.clipboard.writeText(dialog.content)
-
-  }
-
-  const onfocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    e.target.select()
-  }
 
   const cn = useStyles()
   const { t } = useTranslation()

@@ -22,7 +22,7 @@ const FileField = forwardRef<HTMLDivElement, FileInputProps>((props, ref) => {
       setDisplay(fs.map(f => f.name).join(", "))
       if (onSelected) onSelected(fs)
     }
-  }, [setDisplay])
+  }, [])
 
   const input = useMemo(() => {
     const i = document.createElement("input")

@@ -3,7 +3,6 @@ import { useObserver } from "mobx-react-lite"
 import Grid from "@material-ui/core/Grid"
 import Typography from "@material-ui/core/Typography"
 import { useTranslation } from "react-i18next"
-import { useMapChange } from "../../states"
 import { makeStyles } from "@material-ui/core/styles"
 import Table from "@material-ui/core/Table"
 import TableHead from "@material-ui/core/TableHead"
@@ -25,8 +24,6 @@ const TimepointTable = () => {
 
   const cn = useStyles()
   const { t } = useTranslation()
-  useMapChange()
-
   return useObserver(() =>
     <Table className={cn.table}>
       <TableHead>
@@ -49,15 +46,14 @@ const TimepointTable = () => {
     </Table>)
 }
 
+const removeTp = () => {
+  if (TimingState.selected === null) return
+  scope.map.removeTimepoint(TimingState.selected, scope.settings.editor.justify_grid_divisor)
+  TimingState.selected = null
+}
 const RemoveBtn = () => {
 
   const { t } = useTranslation()
-
-  const removeTp = () => {
-    if (TimingState.selected === null) return
-    scope.map.removeTimepoint(TimingState.selected, scope.settings.editor.justify_grid_divisor)
-    TimingState.selected = null
-  }
 
   return useObserver(() =>
     <Button color="secondary" disabled={TimingState.selected === null} onClick={removeTp}>

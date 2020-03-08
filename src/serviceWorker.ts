@@ -82,6 +82,10 @@ function registerValidSW(swUrl: string, config?: Config) {
                 'tabs for this page are closed. See https://bit.ly/CRA-PWA.'
               )
 
+              window.addEventListener("beforeunload", () => {
+                installingWorker.postMessage({ type: 'SKIP_WAITING' })
+              })
+
               // Execute callback
               if (config && config.onUpdate) {
                 config.onUpdate(registration)

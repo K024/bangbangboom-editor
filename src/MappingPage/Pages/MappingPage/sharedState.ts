@@ -6,6 +6,8 @@ import { NoteType } from "../../../MappingScope/EditMap"
 
 export type ToolTypes = "none" | "single" | "slide" | "delete"
 
+const NoteSig = (n: NoteType) => `${n.timepoint}:${n.offset}:${n.lane}`
+
 class State {
 
   @observable private _viewposition = 0
@@ -39,41 +41,30 @@ class State {
     return Music.duration * 1.2
   }
 
-
-  @observable private mapChangeCounter = 1
   @computed get samePosNotes() {
     const notes = new Set<number>()
-    if (this.mapChangeCounter) {
-      const NoteSig = (n: NoteType) => `${n.timepoint}:${n.offset}:${n.lane}`
-      for (const slide of scope.map.slidelist) {
-        let from = assert(scope.map.notes.get(slide.notes[0]))
-        for (let i = 1; i < slide.notes.length; i++) {
-          const to = assert(scope.map.notes.get(slide.notes[i]))
-          if (from.timepoint === to.timepoint && from.offset === to.offset) {
-            notes.add(from.id)
-            notes.add(to.id)
-          }
-          from = to
+    for (const slide of scope.map.slidelist) {
+      let from = assert(scope.map.notes.get(slide.notes[0]))
+      for (let i = 1; i < slide.notes.length; i++) {
+        const to = assert(scope.map.notes.get(slide.notes[i]))
+        if (from.timepoint === to.timepoint && from.offset === to.offset) {
+          notes.add(from.id)
+          notes.add(to.id)
         }
+        from = to
       }
-      const set = new Set<string>()
-      for (const n of scope.map.notelist) {
-        const sig = NoteSig(n)
-        if (set.has(sig)) notes.add(n.id)
-        set.add(sig)
-      }
+    }
+    const set = new Set<string>()
+    for (const n of scope.map.notelist) {
+      const sig = NoteSig(n)
+      if (set.has(sig)) notes.add(n.id)
+      set.add(sig)
     }
     return notes
   }
 
   @computed get noteListOrdered() {
-    const list: NoteType[] = []
-    if (this.mapChangeCounter) {
-      for (const n of scope.map.notelist) {
-        list.push(n)
-      }
-    }
-    return list.sort((a, b) => a.realtimecache - b.realtimecache)
+    return scope.map.notelist.slice().sort((a, b) => a.realtimecache - b.realtimecache)
   }
 
   constructor() {
@@ -81,7 +72,6 @@ class State {
       const offset = 100 / this.timeHeightFactor
       if (!t) this._viewposition = Music.position() - offset
     })
-    scope.map.changeListeners.add(() => this.mapChangeCounter++)
   }
 }
 
@@ -93,7 +83,7 @@ export function GridD1() {
   let endtime = 0
   for (let i = 0; i < tps.length; i++) {
     const tp = tps[i]
-    endtime = i < tps.length - 1 ? tps[i + 1].time : Music.duration
+    endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat = 1
     while (true) {
       const time = tp.time + tp.ticktimecache * 48 * beat
@@ -117,7 +107,7 @@ export function GridD2() {
   let endtime = 0
   for (let i = 0; i < tps.length; i++) {
     const tp = tps[i]
-    endtime = i < tps.length - 1 ? tps[i + 1].time : Music.duration
+    endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat = 0
     const offset = tp.ticktimecache * 24
     while (true) {
@@ -136,7 +126,7 @@ export function GridD3() {
   let endtime = 0
   for (let i = 0; i < tps.length; i++) {
     const tp = tps[i]
-    endtime = i < tps.length - 1 ? tps[i + 1].time : Music.duration
+    endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat_3 = 1
     while (true) {
       const time = tp.time + tp.ticktimecache * 16 * beat_3
@@ -155,7 +145,7 @@ export function GridD4() {
   let endtime = 0
   for (let i = 0; i < tps.length; i++) {
     const tp = tps[i]
-    endtime = i < tps.length - 1 ? tps[i + 1].time : Music.duration
+    endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat_2 = 0.5
     while (true) {
       const time = tp.time + tp.ticktimecache * 24 * beat_2

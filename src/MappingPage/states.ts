@@ -1,19 +1,6 @@
-import { useState, useEffect } from "react"
 import { scope } from "../MappingScope/scope"
 import { observable, autorun } from "mobx"
 import { AudioInstance, AudioSource, AudioElInstance } from "../Common/AudioCtx"
-
-export function useMapChange() {
-  const [i, setI] = useState(1)
-
-  useEffect(() => {
-    const listener = () => setI(i => i + 1)
-    scope.map.changeListeners.add(listener)
-    return () => { scope.map.changeListeners.delete(listener) }
-  }, [])
-
-  return i
-}
 
 class BackgroundState {
   @observable src = ""

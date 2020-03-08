@@ -15,6 +15,7 @@ import Switch from "@material-ui/core/Switch"
 import { userMessage } from "../../../Common/Components/GlobalSnackbar"
 import FormLabel from "@material-ui/core/FormLabel"
 import NumberField from "../../../Common/Components/NumberField"
+import i18n from "../../../i18n"
 
 
 const useStyles = makeStyles(theme => ({
@@ -47,7 +48,7 @@ const SwitchWrapper = (props: { children: React.ReactNode, label: React.ReactNod
   </Grid>
 
 const General = () => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   return useObserver(() => <>
     <Grid item>
       <Typography variant="h6">{t("General")}</Typography>
@@ -78,17 +79,17 @@ const General = () => {
   </>)
 }
 
+const changeKeepPitch = (e: any, v: boolean) => {
+  scope.settings.editor.keep_pitch = v
+  if (v) {
+    userMessage(i18n.t("This may cause unstable delay of song.") + " " + i18n.t("Please reload the music to activate"), "warning")
+  } else {
+    userMessage(i18n.t("Please reload the music to activate"), "warning")
+  }
+}
+
 const Editor = () => {
   const { t } = useTranslation()
-
-  const changeKeepPitch = (e: any, v: boolean) => {
-    scope.settings.editor.keep_pitch = v
-    if (v) {
-      userMessage(t("This may cause unstable delay of song.") + " " + t("Please reload the music to activate"), "warning")
-    } else {
-      userMessage(t("Please reload the music to activate"), "warning")
-    }
-  }
 
   return useObserver(() => <>
     <Grid item>

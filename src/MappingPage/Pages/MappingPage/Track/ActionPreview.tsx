@@ -6,7 +6,6 @@ import { MappingState } from "../sharedState"
 import { Cross, Rect } from "./SVGs"
 import { entryList } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
-import { useMapChange } from "../../../states"
 
 const createStyle = (time: number, lane: number) => {
   return {
@@ -74,7 +73,6 @@ const DragOneNote = () => {
 
 const SelectedNotes = () => {
   const cn = useNoteStyles()
-  useMapChange()
   const props = useObserver(() => {
     const className = cn.note + " " + cn.noevent
     const map = new Map<number, React.SVGProps<SVGSVGElement>>()

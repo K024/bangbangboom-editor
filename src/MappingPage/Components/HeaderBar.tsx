@@ -11,7 +11,6 @@ import UndoIcon from '@material-ui/icons/Undo'
 import DoneOutlineIcon from '@material-ui/icons/DoneOutline'
 import { useHashRoutes, NavigateTo } from "../routes"
 import { scope } from "../../MappingScope/scope"
-import { useMapChange } from "../states"
 import { addHotkey } from "../../Common/hooks"
 import { useTranslation } from "react-i18next"
 import { userMessage } from "../../Common/Components/GlobalSnackbar"
@@ -69,15 +68,13 @@ const SaveIcon = () => {
 
 const HeaderActions = () => {
 
-  useMapChange()
-
   useEffect(() => addHotkey("ctrl+z", scope.map.Undo), [])
   useEffect(() => addHotkey("ctrl+shift+z", scope.map.Redo), [])
   useEffect(() => addHotkey("ctrl+s", save), [])
 
   const { t } = useTranslation()
 
-  const actionlist1 = [
+  const actionlist1 = useObserver(() => [
     {
       children: <UndoIcon />, onClick: scope.map.Undo, disabled: !scope.map.canUndo,
       title: t("Hotkey: {{ hotkey }}", { hotkey: "ctrl + z" })
@@ -87,7 +84,7 @@ const HeaderActions = () => {
       title: t("Hotkey: {{ hotkey }}", { hotkey: "ctrl + shift + z" })
     },
     { children: <SaveIcon />, onClick: save, title: t("Hotkey: {{ hotkey }}", { hotkey: "ctrl + s" }) },
-  ]
+  ])
   const actionlist2 = [
     { children: <PlayCircleFilledIcon />, onClick: startGame },
   ]

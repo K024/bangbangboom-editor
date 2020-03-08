@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { useObserver } from "mobx-react-lite"
 import { scope } from "../../../MappingScope/scope"
 import TextField from "@material-ui/core/TextField"
+import i18n from "../../../i18n"
 
 const FileFieldWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -34,38 +35,37 @@ const MapName = () => {
     </Grid>)
 }
 
+
 let musicfilename = ""
+const selectM = (files: File[]) => {
+  musicfilename = files[0].name
+  Music.load(files[0],
+    () => userMessage(i18n.t("Load failed"), "error"),
+    () => userMessage(i18n.t("Load success"), "success"))
+}
 const SelectMusic = () => {
   const { t } = useTranslation()
-
-  const select = (files: File[]) => {
-    musicfilename = files[0].name
-    Music.load(files[0],
-      () => userMessage(t("Load failed"), "error"),
-      () => userMessage(t("Load success"), "success"))
-  }
 
   return (
     <FileFieldWrapper>
       <FileField fullWidth value={musicfilename} label={t("Load music")}
-        accept="audio/*" onFileSelected={select} />
+        accept="audio/*" onFileSelected={selectM} />
     </FileFieldWrapper>)
 }
 
 let backgroundfilename = ""
+const selectBg = (files: File[]) => {
+  backgroundfilename = files[0].name
+  const src = URL.createObjectURL(files[0])
+  Background.src = src
+}
 const SelectBackground = () => {
   const { t } = useTranslation()
-
-  const select = (files: File[]) => {
-    backgroundfilename = files[0].name
-    const src = URL.createObjectURL(files[0])
-    Background.src = src
-  }
 
   return (
     <FileFieldWrapper>
       <FileField fullWidth value={backgroundfilename} label={t("Load background")}
-        accept="image/*" onFileSelected={select} />
+        accept="image/*" onFileSelected={selectBg} />
     </FileFieldWrapper>)
 }
 

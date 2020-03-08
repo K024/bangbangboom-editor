@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import { NoteType, SlideNote } from "../../../../MappingScope/EditMap"
 import { MappingState } from "../sharedState"
 import { useStyles, useNoteStyles } from "./styles"
-import { useMapChange } from "../../../states"
 import { autorun } from "mobx"
 import { scope } from "../../../../MappingScope/scope"
 import { assert } from "../../../../Common/utils"
@@ -68,11 +67,12 @@ const BarLayer = () => {
     return () => { window.removeEventListener("resize", listener); dispose() }
   }, [])
 
-  useMapChange()
-
-  const list: React.ReactNode[] = []
-  forEachBar((from, to) =>
-    list.push(<Bar key={from.id + ":" + to.id} from={from} to={to} layerWidth={layerWidth} />))
+  const list = useObserver(() => {
+    const list: React.ReactNode[] = []
+    forEachBar((from, to) =>
+      list.push(<Bar key={from.id + ":" + to.id} from={from} to={to} layerWidth={layerWidth} />))
+    return list
+  })
 
   return (
     <div className={cn.layer} ref={layer}>

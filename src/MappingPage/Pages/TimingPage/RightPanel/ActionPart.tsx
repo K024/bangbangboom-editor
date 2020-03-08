@@ -7,7 +7,6 @@ import { TimingState } from "../sharedState"
 import { scope } from "../../../../MappingScope/scope"
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Switch from "@material-ui/core/Switch"
-import { useMapChange } from "../../../states"
 
 const addtp = () => {
   scope.map.addTimepoint(
@@ -42,7 +41,6 @@ export const changed = () => {
 const ActionPart = () => {
 
   const { t } = useTranslation()
-  useMapChange()
 
   return useObserver(() =>
     <Grid item container wrap="wrap" spacing={2}>

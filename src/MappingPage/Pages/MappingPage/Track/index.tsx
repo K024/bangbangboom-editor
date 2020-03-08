@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { autorun } from "mobx"
+import { autorun, action } from "mobx"
 import { startAnimation, stopAnimation } from "../../../../Common/animation"
 import { Music } from "../../../states"
 import { MappingState } from "../sharedState"
@@ -17,14 +17,14 @@ import { binarySearch } from "../../../../Common/binarySearch"
 
 const transY = (viewTime: number) => `translateY(${MappingState.timeHeightFactor * viewTime}px)`
 
-const handleScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+const handleScroll = action((e: React.WheelEvent<HTMLDivElement>) => {
   e.stopPropagation()
   const dt = e.deltaY / MappingState.timeHeightFactor
   const target = MappingState.getViewposition() - dt
   MappingState.setViewposition(target)
-}
+})
 
-const flushPointerPos = (e: MouseEvent | TouchEvent) => {
+const flushPointerPos = action((e: MouseEvent | TouchEvent) => {
   if ("buttons" in e) {
     state.pointerClientX = e.clientX
     state.pointerClientY = e.clientY
@@ -34,10 +34,10 @@ const flushPointerPos = (e: MouseEvent | TouchEvent) => {
     state.pointerClientX = touches.reduce((a, b) => a + b.clientX, 0) / touches.length
     state.pointerClientY = touches.reduce((a, b) => a + b.clientY, 0) / touches.length
   }
-}
+})
 
 let selectPointer = -1
-const handleDown = (e: MouseEvent | TouchEvent) => {
+const handleDown = action((e: MouseEvent | TouchEvent) => {
   e.stopPropagation()
   e.preventDefault()
   if (document.activeElement && "blur" in document.activeElement) {
@@ -57,8 +57,8 @@ const handleDown = (e: MouseEvent | TouchEvent) => {
   if (!e.ctrlKey) {
     state.selectedNotes.clear()
   }
-}
-const stopSelect = () => {
+})
+const stopSelect = action(() => {
   if (!state.selecting) return
   selectPointer = -1
   state.selecting = false
@@ -67,7 +67,7 @@ const stopSelect = () => {
   state.selectingNotes = []
   state.preventClick++
   setTimeout(() => state.preventClick--, 50)
-}
+})
 window.addEventListener("mouseup", e => {
   if (e.button === selectPointer) stopSelect()
 })
@@ -75,7 +75,7 @@ window.addEventListener("touchend", e => {
   if (e.changedTouches[0].identifier === selectPointer) stopSelect()
 })
 
-const handleMove = (e: MouseEvent | TouchEvent) => {
+const handleMove = action((e: MouseEvent | TouchEvent) => {
   flushPointerPos(e)
   if (!("buttons" in e) || e.buttons & 3) {
     if (state.draggingNote < 0 && !state.selecting)
@@ -100,9 +100,9 @@ const handleMove = (e: MouseEvent | TouchEvent) => {
         return false
       }).map(x => x.id)
   }
-}
+})
 
-const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+const handleClick = action((e: React.MouseEvent<HTMLDivElement>) => {
   flushPointerPos(e.nativeEvent)
   e.stopPropagation()
   e.preventDefault()
@@ -127,7 +127,7 @@ const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     default:
       return
   }
-}
+})
 
 const Track = () => {
   const cn = useStyles()

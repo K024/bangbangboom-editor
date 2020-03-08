@@ -1,4 +1,5 @@
 import { neverHappen, assert, entryList } from "../Common/utils"
+import { observable } from "mobx"
 
 export type WithId = {
   id: number
@@ -86,17 +87,17 @@ export class EditMap {
   /**
    * id => timepoint
    */
-  timepoints: Map<number, Timepoint>
+  @observable timepoints: Map<number, Timepoint>
 
   /**
    * id => slide
    */
-  slides: Map<number, Slide>
+  @observable slides: Map<number, Slide>
 
   /**
    * id => note
    */
-  notes: Map<number, NoteType>
+  @observable notes: Map<number, NoteType>
 
   private constructor(map: EditMap) {
     this.timepoints = map.timepoints
@@ -151,7 +152,7 @@ export function FreshNoteCache(map: EditMap, n: TimedPosition) {
 
 export function ResortSlide(map: EditMap, slide: Slide) {
   let hasEqual = false
-  const sorted = slide.notes.sort((a, b) => {
+  const sorted = slide.notes.slice().sort((a, b) => {
     const res = assert(map.notes.get(a)).realtimecache - assert(map.notes.get(b)).realtimecache
     if (res === 0) hasEqual = true
     return res

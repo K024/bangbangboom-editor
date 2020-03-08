@@ -1,10 +1,11 @@
 import { EditMap, Timepoint, FreshTimepointCache } from "../../EditMap"
 import { assert, shallowPatch } from "../../../Common/utils"
 import { makeAction } from "./types"
+import { observable } from "mobx"
 
 const add = (map: EditMap, id: number, time: number, bpm: number, bpb: number) => {
   const newtp: Timepoint =
-    { id, time, bpm, bpb, ticktimecache: 0 }
+    observable({ id, time, bpm, bpb, ticktimecache: 0 })
 
   map.timepoints.set(newtp.id, newtp)
 

@@ -1,16 +1,19 @@
 import { AtomHistory } from "./AtomHistory"
+import { action, observable, computed } from "mobx"
 
 export class CommonActions<T> {
   protected history: AtomHistory<T>
+  @observable protected state: T
 
-  private act_done: number[] = []
-  private act_todo: number[] = []
+  @observable private act_done: number[] = []
+  @observable private act_todo: number[] = []
 
-  get canUndo() { return this.act_done.length > 0 }
-  get canRedo() { return this.act_todo.length > 0 }
-
-  constructor(protected state: T) {
+  @computed get canUndo() { return this.act_done.length > 0 }
+  @computed get canRedo() { return this.act_todo.length > 0 }
+  
+  constructor(state: T) {
     this.history = new AtomHistory(state)
+    this.state = state
   }
 
   readonly changeListeners = new Set<() => void>()
@@ -21,6 +24,7 @@ export class CommonActions<T> {
     }
   }
 
+  @action
   ResetState = (state: T) => {
     this.state = state
     this.history = new AtomHistory(state)
@@ -39,6 +43,7 @@ export class CommonActions<T> {
     return false
   }
 
+  @action
   Undo = () => {
     const step = this.act_done.pop()
     if (step === undefined) return
@@ -50,6 +55,7 @@ export class CommonActions<T> {
     this.changed()
   }
 
+  @action.bound
   Redo = () => {
     const step = this.act_todo.pop()
     if (step === undefined) return

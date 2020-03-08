@@ -1,7 +1,7 @@
 import React from "react"
 import { makeStyles } from "@material-ui/core/styles"
 import { GridD1, MappingState, GridD2, GridD3, GridD4 } from "../sharedState"
-import { useMapChange, Music } from "../../../states"
+import { Music } from "../../../states"
 import { useObserver } from "mobx-react-lite"
 import { range, TimeToString } from "../../../../Common/utils"
 import { useStyles as useLayerStyle } from "./styles"
@@ -45,7 +45,6 @@ const LaneAndTime = () => {
 const DivisorLines = () => {
 
   const cn = useStyles()
-  useMapChange()
 
   return useObserver(() => <>
     <>
@@ -67,7 +66,6 @@ const DivisorLines = () => {
 const TimepointStart = () => {
 
   const cn = useStyles()
-  useMapChange()
 
   return useObserver(() => <>
     {scope.map.timepointlist.map(tp =>

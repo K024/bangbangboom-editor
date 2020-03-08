@@ -1,14 +1,15 @@
 import { EditMap, SlideNote, FreshNoteCache, ResortSlide } from "../../EditMap"
 import { assert, neverHappen, shallowPatch } from "../../../Common/utils"
 import { makeAction } from "./types"
+import { observable } from "mobx"
 
 
 const add = (map: EditMap, id: number, slide: number, timepoint: number, offset: number, lane: number) => {
-  const note: SlideNote = {
+  const note: SlideNote = observable({
     type: "slide",
     id, slide, timepoint, offset, lane,
     realtimecache: 0
-  }
+  })
 
   const s = assert(map.slides.get(slide))
   s.notes.push(id)

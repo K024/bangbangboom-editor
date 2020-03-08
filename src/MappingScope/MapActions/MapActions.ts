@@ -5,10 +5,12 @@ import { SlideActions } from "./AtomActions/Slide"
 import { SlideNoteActions } from "./AtomActions/SlideNote"
 import { TimepointActions } from "./AtomActions/Timepoint"
 import { MapActionsBase } from "./MapAtionsBase"
+import { action } from "mobx"
 
 
 export class MapActions extends MapActionsBase {
 
+  @action.bound
   addTimepoint(time: number, bpm: number, bpb: number, justifydivision: number) {
     return this.done(this.history.doParallel(() => {
       if (this.history.callAtom(TimepointActions.Add, randomId(), time, bpm, bpb)) {
@@ -17,6 +19,7 @@ export class MapActions extends MapActionsBase {
     }))
   }
 
+  @action.bound
   moveTimepoint(timepoint: number, justifyFindNearest: boolean, justifydivision: number, time?: number, bpm?: number, bpb?: number) {
     const tp = assert(this.state.timepoints.get(timepoint))
     const timechanged =
@@ -34,12 +37,12 @@ export class MapActions extends MapActionsBase {
     }))
   }
 
+  @action.bound
   removeTimepoint(timepoint: number, justifydivision: number) {
     if (this.state.timepoints.size > 1) {
       return this.done(this.history.doParallel(() => {
-        if (this.history.callAtom(TimepointActions.Remove, timepoint)) {
-          this.justifyFindNearest(this.notelist, justifydivision)
-        }
+        this.justifyFindNearest(this.notelist, justifydivision, timepoint)
+        this.history.callAtom(TimepointActions.Remove, timepoint)
       }))
     } else {
       return this.done(this.history.doParallel(() => {
@@ -52,11 +55,13 @@ export class MapActions extends MapActionsBase {
     }
   }
 
+  @action.bound
   addSingle(timepoint: number, offset: number, lane: number) {
     return this.done(this.history.doTransaction(() =>
       this.history.callAtom(SingleFlickActions.Add, randomId(), "single", timepoint, offset, lane)))
   }
 
+  @action.bound
   toggleFlick(note: SingleNote | FlickNote) {
     return this.done(this.history.doTransaction(() =>
       this.history.callAtom(SingleFlickActions.Set, note.id, {
@@ -64,6 +69,7 @@ export class MapActions extends MapActionsBase {
       })))
   }
 
+  @action.bound
   addSlide(tp1: number, off1: number, lane1: number, tp2: number, off2: number, lane2: number) {
     const sid = randomId()
     return this.done(this.history.doTransaction(() =>
@@ -72,17 +78,20 @@ export class MapActions extends MapActionsBase {
       this.history.callAtom(SlideNoteActions.Add, randomId(), sid, tp2, off2, lane2)))
   }
 
+  @action.bound
   toggleFlickend(slide: number) {
     const s = assert(this.state.slides.get(slide))
     return this.done(this.history.doTransaction(() =>
       this.history.callAtom(SlideActions.Set, slide, { flickend: !s.flickend })))
   }
 
+  @action.bound
   addSlideMid(slide: number, timepoint: number, offset: number, lane: number) {
     return this.done(this.history.doTransaction(() =>
       this.history.callAtom(SlideNoteActions.Add, randomId(), slide, timepoint, offset, lane)))
   }
 
+  @action.bound
   moveMany(notes: NoteType[], timeoffset: number, min: number, max: number, laneoffset: number, division: number) {
     return this.done(this.history.doTransaction(() => {
       for (const n of notes) {
@@ -100,6 +109,7 @@ export class MapActions extends MapActionsBase {
     }))
   }
 
+  @action.bound
   copyMany(notes: NoteType[], timeoffset: number, min: number, max: number, laneoffset: number, division: number) {
     return this.done(this.history.doTransaction(() => {
       const slideidmap: { [key: number]: number } = {}
@@ -139,6 +149,7 @@ export class MapActions extends MapActionsBase {
     }))
   }
 
+  @action.bound
   removeNotes(notes: NoteType[]) {
     return this.done(this.history.doParallel(() => {
       this.deleteMany(notes)

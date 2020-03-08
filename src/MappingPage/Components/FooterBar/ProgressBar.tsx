@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react"
 import clsx from "clsx"
 import { makeStyles } from "@material-ui/core/styles"
-import { Music, useMapChange } from "../../states"
+import { Music } from "../../states"
 import { createAnimLoop } from "../../../Common/hooks"
 import { TimeToString } from "../../../Common/utils"
 import { scope } from "../../../MappingScope/scope"
@@ -28,11 +28,8 @@ const TimepointLines = () => {
 
   const cn = useStyles()
 
-  useMapChange()
-  const timepoints = scope.map.timepointlist
-
   return useObserver(() => <>
-    {timepoints.map(tp =>
+    {scope.map.timepointlist.map(tp =>
       <div key={tp.id} className={cn.timepoint} style={{ left: leftStyle(tp.time) }} />)}
   </>)
 }

@@ -1,12 +1,13 @@
 import { EditMap, Slide } from "../../EditMap"
 import { assert, neverHappen, shallowPatch } from "../../../Common/utils"
 import { makeAction } from "./types"
+import { observable } from "mobx"
 
 
 const add = (map: EditMap, id: number, flickend: boolean) => {
-  const slide: Slide = {
+  const slide: Slide = observable({
     id, flickend, notes: []
-  }
+  })
   map.slides.set(id, slide)
 
   return slide

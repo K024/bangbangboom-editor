@@ -5,13 +5,14 @@ import { useStyles, useNoteStyles } from "./styles"
 import assets from "../../../assets"
 import { assert, neverHappen } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
-import { useMapChange, Music } from "../../../states"
+import { Music } from "../../../states"
 import { useMirror, state } from "./state"
 import { useObserver } from "mobx-react-lite"
+import { action } from "mobx"
 
 let dragPointer = -1
-const downEventHandler = (nid: number) => {
-  return (e: React.MouseEvent<HTMLImageElement> | React.TouchEvent<HTMLImageElement>) => {
+const downEventHandler = action((nid: number) => {
+  return action((e: React.MouseEvent<HTMLImageElement> | React.TouchEvent<HTMLImageElement>) => {
     e.stopPropagation()
     e.preventDefault()
     const note = assert(scope.map.notes.get(nid))
@@ -27,10 +28,10 @@ const downEventHandler = (nid: number) => {
     if (!e.ctrlKey && !state.selectedNotes.has(note.id))
       state.selectedNotes.clear()
     state.slideNote1Beat = undefined
-  }
-}
+  })
+})
 
-const handleUp = (e: MouseEvent | TouchEvent) => {
+const handleUp = action((e: MouseEvent | TouchEvent) => {
   if ("buttons" in e) {
     if (e.button !== dragPointer) return
   } else {
@@ -64,19 +65,21 @@ const handleUp = (e: MouseEvent | TouchEvent) => {
         scope.map.moveMany([note], dt, 0, Music.duration, dl, MappingState.division)
     }
 
-    if (copy && scope.map.notelist.length !== before.size) {
-      state.selectedNotes.clear()
-      for (const n of scope.map.notelist) {
-        if (!before.has(n.id)) {
-          state.selectedNotes.add(n.id)
+    setTimeout(action(() => {
+      if (copy && scope.map.notes.size !== before.size) {
+        state.selectedNotes.clear()
+        for (const n of scope.map.notelist) {
+          if (!before.has(n.id)) {
+            state.selectedNotes.add(n.id)
+          }
         }
       }
-    }
+    }))
 
     state.preventClick++
     setTimeout(() => state.preventClick--, 50)
   }
-}
+})
 window.addEventListener("mouseup", handleUp)
 window.addEventListener("touchend", handleUp)
 
@@ -137,43 +140,46 @@ const Note = ({ note }: { note: NoteType }) => {
 
   const cn = useNoteStyles()
 
-  const style = useObserver(() => {
+  const onMouseDown = useMemo(() => downEventHandler(note.id), [note.id])
+  const onContextMenu = useMemo(() => contextMenuHandler(note.id), [note.id])
+  const onDoubleClick = useMemo(() => doubleClickHandler(note.id), [note.id])
+  const onClick = useMemo(() => clickEventHandler(note.id), [note.id])
+
+  const props = useObserver(() => {
     const left = (note.lane * 10 + 15) + "%"
     const bottom = (MappingState.timeHeightFactor * note.realtimecache) + "px"
-    return { left, bottom }
+    let src: string
+    const n = scope.map.notes.get(note.id)
+    if (!n) {
+      // something strange with mobx action
+      return {}
+    }
+    switch (note.type) {
+      case "single": src = assets.note_normal; break
+      case "flick": src = assets.note_flick; break
+      case "slide":
+        const slide = assert(scope.map.slides.get(note.slide))
+        if (note.id === slide.notes[0]) {
+          src = assets.note_long
+        } else if (note.id === slide.notes[slide.notes.length - 1]) {
+          if (slide.flickend)
+            src = assets.note_flick
+          else
+            src = assets.note_long
+        } else {
+          src = assets.note_slide_among
+        }
+        break
+      default: neverHappen()
+    }
+    return {
+      style: { left, bottom }, src,
+      draggable: false, className: cn.note,
+      onMouseDown, onContextMenu, onDoubleClick, onClick
+    }
   })
 
-  const downHandler = useMemo(() => downEventHandler(note.id), [note.id])
-  const ctxmenuHandler = useMemo(() => contextMenuHandler(note.id), [note.id])
-  const doubleHandler = useMemo(() => doubleClickHandler(note.id), [note.id])
-  const clickHandler = useMemo(() => clickEventHandler(note.id), [note.id])
-
-  const props: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> = {
-    onMouseDown: downHandler,
-    onContextMenu: ctxmenuHandler,
-    onDoubleClick: doubleHandler,
-    onClick: clickHandler,
-    style, draggable: false,
-    className: cn.note
-  }
-
-  switch (note.type) {
-    case "single": return <img alt="Single" src={assets.note_normal} {...props} />
-    case "flick": return <img alt="Flick" src={assets.note_flick} {...props} />
-    case "slide":
-      const slide = assert(scope.map.slides.get(note.slide))
-      if (note.id === slide.notes[0]) {
-        return <img alt="Slide start" src={assets.note_long} {...props} />
-      } else if (note.id === slide.notes[slide.notes.length - 1]) {
-        if (slide.flickend)
-          return <img alt="Flick end" src={assets.note_flick} {...props} />
-        else
-          return <img alt="Slide end" src={assets.note_long} {...props} />
-      } else {
-        return <img alt="Slide mid" src={assets.note_slide_among} {...props} />
-      }
-    default: neverHappen()
-  }
+  return <img alt="" {...props} />
 }
 
 const NotesLayer = () => {
@@ -181,8 +187,7 @@ const NotesLayer = () => {
   const cn = useStyles()
   const layer = useMirror()
 
-  useMapChange()
-  return (
+  return useObserver(() =>
     <div className={cn.layer} ref={layer}>
       {scope.map.notelist.map(n => <Note key={n.id} note={n} />)}
     </div>)

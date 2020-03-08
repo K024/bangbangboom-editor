@@ -1,6 +1,6 @@
 import React from "react"
 import Dialog from "@material-ui/core/Dialog"
-import { observable } from "mobx"
+import { observable, action } from "mobx"
 import { useObserver } from "mobx-react-lite"
 import DialogTitle from "@material-ui/core/DialogTitle"
 import DialogContent from "@material-ui/core/DialogContent"
@@ -17,12 +17,12 @@ const dialog = observable({
   confirm: () => { }
 })
 
-export function openConfirm(title: string, content: string, confirm: () => void) {
+export const openConfirm = action((title: string, content: string, confirm: () => void) => {
   dialog.open = true
   dialog.content = content
   dialog.title = title
   dialog.confirm = confirm
-}
+})
 
 const ConfirmDialog = () => {
 
