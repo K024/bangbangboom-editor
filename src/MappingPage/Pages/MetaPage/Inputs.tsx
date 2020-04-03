@@ -49,7 +49,8 @@ const SelectMusic = () => {
   return (
     <FileFieldWrapper>
       <FileField fullWidth value={musicfilename} label={t("Load music")}
-        accept="audio/*" onFileSelected={selectM} />
+        accept=".opus,.flac,.weba,.wav,.ogg,.m4a,.mp3,.oga,.aiff,.wma,.aac"
+        onFileSelected={selectM} />
     </FileFieldWrapper>)
 }
 
