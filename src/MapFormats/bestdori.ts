@@ -2,14 +2,17 @@ import { EditMap, Timepoint } from "../MappingScope/EditMap"
 import { entryList } from "../Common/utils"
 
 type bdBpm = {
-  type: "System"
-  cmd: "BPM"
+  type: "BPM"
   beat: number
   bpm: number
 }
 
 type bdNoteBase = {
-  type: "Note"
+  type: "Single" | "Slide" | "Long" | "Directional"
+}
+
+type bdSingleNote = bdNoteBase & {
+  type: "Single"
   /**
    * bpm:      60          120 at 3
    * timeline: *---*---*---*-*-*-
@@ -17,24 +20,16 @@ type bdNoteBase = {
    */
   beat: number
   /**
-   * from 1 to 7
+   * from 0 to 6
    */
   lane: number
-}
-
-type bdSingleNote = bdNoteBase & {
-  note: "Single"
   flick?: true
   skill?: true
 }
 
 type bdSlideNote = bdNoteBase & {
-  note: "Slide"
-  pos: "A" | "B"
-  start?: true
-  end?: true
-  flick?: true
-  skill?: true
+  type: "Slide"
+  connections: Array<bdSingleNote>
 }
 
 type bdMapItem = bdBpm | bdSingleNote | bdSlideNote
@@ -53,46 +48,6 @@ function format(map: bdMap) {
   }
   strb.push("]")
   return strb.join("")
-}
-
-function slideScope() {
-
-  let a: number | null = null
-  let abeat = 0
-  let b: number | null = null
-  let bbeat = 0
-
-  return {
-    start(id: number, beat: number) {
-      if (a === null && beat > abeat) {
-        a = id
-        return "A"
-      }
-      if (b === null && beat > bbeat) {
-        b = id
-        return "B"
-      }
-      throw new Error("Can not use 3 slides at same time")
-    },
-    mid(id: number) {
-      if (a === id) return "A"
-      if (b === id) return "B"
-      throw new Error("Map may be corrupted")
-    },
-    end(id: number, beat: number) {
-      if (a === id) {
-        a = null
-        abeat = beat
-        return "A"
-      }
-      if (b === id) {
-        b = null
-        bbeat = beat
-        return "B"
-      }
-      throw new Error("Map may be corrupted")
-    }
-  }
 }
 
 function properBpmForSpan(time: number, preferred: number) {
@@ -134,10 +89,10 @@ export function toBestdoriFormat(map: EditMap) {
     const res = properBpmForSpan(lasttp.time, lasttp.bpm)
     if (!res) throw new Error("Can not calculate bpm insertion")
     if (res.bpm === lasttp.bpm || res.beatcount <= 0) {
-      bdmap.push({ type: "System", cmd: "BPM", beat: 0, bpm: lasttp.bpm })
+      bdmap.push({ type: "BPM", beat: 0, bpm: lasttp.bpm })
     } else {
-      bdmap.push({ type: "System", cmd: "BPM", beat: 0, bpm: res.bpm })
-      bdmap.push({ type: "System", cmd: "BPM", beat: res.beatcount, bpm: lasttp.bpm })
+      bdmap.push({ type: "BPM", beat: 0, bpm: res.bpm })
+      bdmap.push({ type: "BPM", beat: res.beatcount, bpm: lasttp.bpm })
     }
     tpbasebeat = res.beatcount
     tpsPut.add(lasttp)
@@ -145,8 +100,7 @@ export function toBestdoriFormat(map: EditMap) {
 
   let inote = 0
   let lastnotebeat = tpbasebeat
-
-  const scope = slideScope()
+  let bdslides: Record<number, bdSlideNote> = {}
 
   while (inote < notes.length) {
     const n = notes[inote++]
@@ -163,11 +117,11 @@ export function toBestdoriFormat(map: EditMap) {
 
       if (res.bpm === tp.bpm || res.beatcount <= 0) {
         tpbasebeat = lastnotebeat + res.beatcount
-        bdmap.push({ type: "System", cmd: "BPM", beat: tpbasebeat, bpm: tp.bpm })
+        bdmap.push({ type: "BPM", beat: tpbasebeat, bpm: tp.bpm })
       } else {
         tpbasebeat = lastnotebeat + res.beatcount
-        bdmap.push({ type: "System", cmd: "BPM", beat: lastnotebeat, bpm: res.bpm })
-        bdmap.push({ type: "System", cmd: "BPM", beat: tpbasebeat, bpm: tp.bpm })
+        bdmap.push({ type: "BPM", beat: lastnotebeat, bpm: res.bpm })
+        bdmap.push({ type: "BPM", beat: tpbasebeat, bpm: tp.bpm })
       }
 
       lasttp = tp
@@ -177,37 +131,33 @@ export function toBestdoriFormat(map: EditMap) {
     }
     if (lasttp !== tp) throw new Error("Map may be corrupted")
 
-    const base: bdNoteBase = {
-      type: "Note", beat: tpbasebeat + n.offset / 48, lane: n.lane + 1
-    }
+    const beat = tpbasebeat + n.offset / 48
+    const lane = n.lane
 
-    lastnotebeat = base.beat
+    lastnotebeat = beat
 
     switch (n.type) {
       case "single":
-        bdmap.push({ ...base, note: "Single", })
+        bdmap.push({ type: "Single", beat, lane  })
         break
       case "flick":
-        bdmap.push({ ...base, note: "Single", flick: true })
+        bdmap.push({ type: "Single", beat, lane, flick: true })
         break
       case "slide":
         const sl = map.slides.get(n.slide)
         if (!sl) throw new Error("Map may be corrupted")
-        const bdn: bdSlideNote = {
-          ...base, note: "Slide", pos: "A"
+        if (!bdslides[sl.id]) bdslides[sl.id] = {
+          type: "Slide", connections: []
         }
-        if (sl.notes[0] === n.id) {
-          bdn.start = true
-          bdn.pos = scope.start(sl.id, base.beat)
+        const bdn: bdSingleNote = {
+          type: "Single", beat, lane
         }
-        else if (sl.notes[sl.notes.length - 1] === n.id) {
-          bdn.end = true
-          bdn.pos = scope.end(sl.id, base.beat)
-          if (sl.flickend) bdn.flick = true
-        } else {
-          bdn.pos = scope.mid(sl.id)
+        if (sl.notes[sl.notes.length - 1] === n.id && sl.flickend) bdn.flick = true
+        bdslides[sl.id].connections.push(bdn)
+        if (sl.notes[sl.notes.length - 1] === n.id) {
+          bdmap.push(bdslides[sl.id])
+          delete bdslides[sl.id]
         }
-        bdmap.push(bdn)
         break
     }
   }
