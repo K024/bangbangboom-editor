@@ -29,7 +29,13 @@ type bdSingleNote = bdNoteBase & {
 
 type bdSlideNote = bdNoteBase & {
   type: "Slide"
-  connections: Array<bdSingleNote>
+  connections: Array<bdSlideTick>
+}
+
+type bdSlideTick = {
+  beat: number
+  lane: number
+  flick?: true
 }
 
 type bdMapItem = bdBpm | bdSingleNote | bdSlideNote
@@ -149,11 +155,11 @@ export function toBestdoriFormat(map: EditMap) {
         if (!bdslides[sl.id]) bdslides[sl.id] = {
           type: "Slide", connections: []
         }
-        const bdn: bdSingleNote = {
-          type: "Single", beat, lane
+        const bdt: bdSlideTick = {
+          beat, lane
         }
-        if (sl.notes[sl.notes.length - 1] === n.id && sl.flickend) bdn.flick = true
-        bdslides[sl.id].connections.push(bdn)
+        if (sl.notes[sl.notes.length - 1] === n.id && sl.flickend) bdt.flick = true
+        bdslides[sl.id].connections.push(bdt)
         if (sl.notes[sl.notes.length - 1] === n.id) {
           bdmap.push(bdslides[sl.id])
           delete bdslides[sl.id]
@@ -161,6 +167,16 @@ export function toBestdoriFormat(map: EditMap) {
         break
     }
   }
+
+  bdmap.sort((a, b) => {
+    const beatA = a.type === "Slide" ? a.connections[0].beat : a.beat
+    const beatB = b.type === "Slide" ? b.connections[0].beat : b.beat
+    if (a.type === "BPM" || b.type === "BPM" || beatA !== beatB) return beatA - beatB
+    const laneA = a.type === "Slide" ? a.connections[0].lane : a.lane
+    const laneB = b.type === "Slide" ? b.connections[0].lane : b.lane
+    return laneA - laneB
+  })
+
   return format(bdmap)
 }
 
